@@ -108,8 +108,12 @@ create policy "Admins delete orders" on public.orders for delete to authenticate
 
 drop policy if exists "Public subscribe newsletter" on public.newsletter_subscribers;
 create policy "Public subscribe newsletter" on public.newsletter_subscribers for insert to anon, authenticated with check (length(email) <= 254 and position('@' in email) > 1);
-drop policy if exists "Admins manage newsletter" on public.newsletter_subscribers;
-create policy "Admins manage newsletter" on public.newsletter_subscribers for select, update, delete to authenticated using (public.is_store_admin()) with check (public.is_store_admin());
+drop policy if exists "Admins read newsletter" on public.newsletter_subscribers;
+create policy "Admins read newsletter" on public.newsletter_subscribers for select to authenticated using (public.is_store_admin());
+drop policy if exists "Admins update newsletter" on public.newsletter_subscribers;
+create policy "Admins update newsletter" on public.newsletter_subscribers for update to authenticated using (public.is_store_admin()) with check (public.is_store_admin());
+drop policy if exists "Admins delete newsletter" on public.newsletter_subscribers;
+create policy "Admins delete newsletter" on public.newsletter_subscribers for delete to authenticated using (public.is_store_admin());
 
 -- IMPORTANT: create your user first in Authentication > Users, then insert its UUID below.
 -- Replace YOUR_AUTH_USER_UUID with the real user UUID shown in Supabase.
