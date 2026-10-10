@@ -115,6 +115,100 @@ create policy "Admins update newsletter" on public.newsletter_subscribers for up
 drop policy if exists "Admins delete newsletter" on public.newsletter_subscribers;
 create policy "Admins delete newsletter" on public.newsletter_subscribers for delete to authenticated using (public.is_store_admin());
 
+
+-- Public checkout RPC: validates prices/stock on the database and stores an order.
+-- Prices and product names come from the database, never from the browser.
+create or replace function public.create_store_order(
+  p_customer_name text,
+  p_customer_phone text,
+  p_shipping_address text,
+  p_city text,
+  p_items jsonb
+) returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $
+declare
+  v_item jsonb;
+  v_product public.products%rowtype;
+  v_qty integer;
+  v_subtotal integer := 0;
+  v_snapshot jsonb := '[]'::jsonb;
+  v_order public.orders%rowtype;
+begin
+  if length(trim(coalesce(p_customer_name,''))) < 2 or length(trim(coalesce(p_customer_name,''))) > 120 then
+    raise exception 'Merci de saisir un nom valide.';
+  end if;
+  if length(trim(coalesce(p_customer_phone,''))) < 7 or length(trim(coalesce(p_customer_phone,''))) > 30 then
+    raise exception 'Merci de saisir un numéro de téléphone valide.';
+  end if;
+  if length(trim(coalesce(p_shipping_address,''))) < 4 or length(trim(coalesce(p_city,''))) < 2 then
+    raise exception 'Merci de saisir une adresse et une ville valides.';
+  end if;
+  if jsonb_typeof(p_items) <> 'array' then raise exception 'Le panier est invalide.'; end if;
+  if jsonb_array_length(p_items) < 1 or jsonb_array_length(p_items) > 30 then raise exception 'Le panier est vide ou trop volumineux.'; end if;
+
+  for v_item in select value from jsonb_array_elements(p_items)
+  loop
+    begin
+      v_qty := (v_item->>'quantity')::integer;
+    exception when others then
+      raise exception 'Quantité invalide.';
+    end;
+    if v_qty < 1 or v_qty > 20 then raise exception 'La quantité doit être comprise entre 1 et 20.'; end if;
+    begin
+      select * into strict v_product from public.products
+      where id = (v_item->>'id')::uuid and is_published = true
+      for update;
+    exception when no_data_found then
+      raise exception 'Un produit du panier n’est plus disponible.';
+    when invalid_text_representation then
+      raise exception 'Un produit du panier est invalide.';
+    end;
+    if v_product.stock < v_qty then
+      raise exception 'Stock insuffisant pour : %.', v_product.name_fr;
+    end if;
+    update public.products set stock = stock - v_qty where id = v_product.id;
+    v_subtotal := v_subtotal + (v_product.price_mad * v_qty);
+    v_snapshot := v_snapshot || jsonb_build_array(jsonb_build_object(
+      'product_id',v_product.id,'slug',v_product.slug,'name',v_product.name_fr,
+      'category',v_product.category,'unit_price_mad',v_product.price_mad,'quantity',v_qty
+    ));
+  end loop;
+
+  insert into public.orders(customer_name,customer_phone,shipping_address,city,items,subtotal_mad,delivery_mad,total_mad,status)
+  values(trim(p_customer_name),trim(p_customer_phone),trim(p_shipping_address),trim(p_city),v_snapshot,v_subtotal,0,v_subtotal,'pending')
+  returning * into v_order;
+
+  return jsonb_build_object('order_number',v_order.order_number,'total_mad',v_order.total_mad,'status',v_order.status);
+end;
+$;
+
+revoke all on function public.create_store_order(text,text,text,text,jsonb) from public;
+grant execute on function public.create_store_order(text,text,text,text,jsonb) to anon, authenticated;
+
+create or replace function public.restore_stock_on_cancel()
+returns trigger language plpgsql security definer set search_path = public
+as $
+declare v_item jsonb;
+begin
+  if old.status <> 'cancelled' and new.status = 'cancelled' then
+    for v_item in select value from jsonb_array_elements(old.items)
+    loop
+      update public.products set stock = stock + greatest(0,coalesce((v_item->>'quantity')::integer,0))
+      where id = (v_item->>'product_id')::uuid;
+    end loop;
+  elsif old.status = 'cancelled' and new.status <> 'cancelled' then
+    raise exception 'Une commande annulée ne peut pas être réactivée.';
+  end if;
+  return new;
+end;
+$;
+drop trigger if exists orders_restore_stock on public.orders;
+create trigger orders_restore_stock before update of status on public.orders for each row execute function public.restore_stock_on_cancel();
+
+
 -- IMPORTANT: create your user first in Authentication > Users, then insert its UUID below.
 -- Replace YOUR_AUTH_USER_UUID with the real user UUID shown in Supabase.
 -- insert into public.admin_profiles (id, role, display_name)
