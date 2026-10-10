@@ -55,4 +55,4 @@ The current catalogue is demonstration content. Prices, descriptions and photos 
 - Published landing pages are available at `page.html?slug=your-page-slug` and can be linked from the storefront.
 - Setup guide: [SUPABASE_SETUP.md](./SUPABASE_SETUP.md).
 
-The Supabase integration is inactive until you create your project, run the SQL, set the public URL/key and grant the admin role to your user. Public checkout still does not persist orders yet; do not use the demo checkout as a production order system.
+The Supabase integration is inactive until you create your project, run the SQL, set the public URL/key and grant the admin role to your user. Public checkout creates database-backed orders through a stock- and price-validating Supabase RPC once configured. Delivery fees are still set to 0 DH and must be configured before launch.
