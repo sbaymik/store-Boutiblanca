@@ -4,7 +4,7 @@ A responsive French/Arabic storefront MVP for a Moroccan traditional fashion bra
 
 **Repository:** https://github.com/sbaymik/store-Boutiblanca
 
-## Current MVP
+## Current implementation
 
 - Editorial storefront with responsive desktop and mobile layouts.
 - French/Arabic language switch with RTL layout support.
@@ -44,3 +44,15 @@ Then visit http://localhost:8080.
 ## Important
 
 The current catalogue is demonstration content. Prices, descriptions and photos are placeholders, and the checkout does not send an order until the store WhatsApp number is configured. The current newsletter form does not save addresses.
+
+
+## Supabase admin and landing pages
+
+- `admin.html`: authenticated admin workspace (Supabase Auth + admin role).
+- `supabase/schema.sql`: schema, row-level security policies, sample product rows.
+- `supabase-config.js`: public project URL + anon/publishable key placeholders; never use service_role in frontend.
+- `admin.html` → Landing pages: paste a full HTML document, preview in a sandboxed iframe, save as draft or publish.
+- Published landing pages are available at `page.html?slug=your-page-slug` and can be linked from the storefront.
+- Setup guide: [SUPABASE_SETUP.md](./SUPABASE_SETUP.md).
+
+The Supabase integration is inactive until you create your project, run the SQL, set the public URL/key and grant the admin role to your user. Public checkout still does not persist orders yet; do not use the demo checkout as a production order system.
