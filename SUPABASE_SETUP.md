@@ -33,12 +33,16 @@ Dans Administration → Produits, ajoute/modifie les noms français et arabes, l
 
 Le contenu HTML est rendu dans une iframe sandboxée sans accès au DOM parent ni à la session admin. Les fonctions qui dépendent de cookies tiers, de scripts bloqués ou de chemins relatifs peuvent demander des ajustements. Pour les images, privilégie des URL HTTPS absolues. Ne colle pas de mots de passe, de clés privées ou de scripts de paiement non vérifiés.
 
-## 5. Déploiement
+## 5. Commandes et stock
+
+Le checkout public demande le nom, le téléphone, la ville et l'adresse. Il appelle `create_store_order` : le navigateur n'envoie que les identifiants et quantités ; la base récupère les prix, vérifie les stocks et crée la commande en statut « À confirmer ». L'administration permet de mettre à jour le statut. Le passage en « Annulée » restitue le stock. Les frais de livraison sont actuellement à 0 DH : configure-les avant d'ouvrir les commandes au public.
+
+## 6. Déploiement
 Publie le dépôt sur un hébergeur statique (GitHub Pages, Netlify ou Vercel). Configure le domaine et les redirections HTTPS chez l'hébergeur. Le site ne peut pas accéder à ta base avant d'avoir renseigné les identifiants publics Supabase et exécuté le SQL.
 
 ## État / limites actuelles
 - Le panneau admin comprend l'authentification, le CRUD du catalogue, la création/édition/publication des landing pages, et la consultation/mise à jour du statut des commandes.
-- Le schéma inclut la table des commandes, mais le checkout public ne crée pas encore de commandes en base. Il faut ajouter une fonction serveur/RPC validant les prix et les stocks avant de lancer de vraies commandes.
+- Le checkout public enregistre maintenant les commandes via la fonction SQL `create_store_order`, qui recalcule les prix à partir de la base, vérifie le stock et le réserve. Une annulation depuis l'admin restitue le stock. Les frais de livraison sont à 0 DH pour le moment et doivent être configurés avant le lancement.
 - Le catalogue utilise des images via URL, pas encore un upload de fichiers.
 - Les landing pages sont isolées en iframe ; elles ont leur propre contenu HTML, elles ne remplacent pas le document parent.
 - Les prix et images de démonstration doivent être remplacés avant la mise en vente.
