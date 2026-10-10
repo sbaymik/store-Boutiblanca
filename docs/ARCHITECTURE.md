@@ -8,13 +8,16 @@ Languages: French (default) and Arabic (RTL). Currency: Moroccan dirham (MAD / D
 
 ## Current implementation
 
-The first milestone is a zero-build static storefront:
-- semantic HTML;
-- responsive CSS;
-- plain JavaScript for catalogue rendering, search, category filtering, language switching and cart state;
-- browser local storage for the demo cart.
+The repository is a zero-build static storefront connected to Supabase when configured:
+- Public storefront with responsive layout, French/Arabic switch, catalogue filters/search and cart.
+- Supabase Auth-protected admin at `admin.html`, with admin-role verification through `admin_profiles`.
+- Product CRUD (prices in DH, stock, category, FR/AR copy, image URL, publish/draft).
+- Landing-page editor: paste a complete HTML document, preview in a sandboxed iframe, save drafts and publish pages at `page.html?slug=...`.
+- Supabase schema with Row Level Security for products, landing pages, profiles and orders.
+- Database checkout RPC recalculates prices from the database, validates and reserves stock, stores an order; cancellation restores reserved stock.
+- Browser local storage for cart persistence.
 
-This keeps the first iteration easy to review and deploy. It is not yet a complete SaaS and must not be used to claim that orders, inventory or newsletter signups are persisted server-side.
+Supabase is not live until the owner creates a project, runs `supabase/schema.sql`, fills `supabase-config.js`, and grants their user the admin role. Product imagery and initial product rows are demo placeholders. Delivery is currently 0 DH and must be configured before public launch. The newsletter table/policy exists, but the public form is still a placeholder.
 
 ## Target modules
 
@@ -52,12 +55,11 @@ This keeps the first iteration easy to review and deploy. It is not yet a comple
 
 ## Suggested build sequence
 
-1. **Storefront foundation** — implemented in this commit: responsive landing page, catalogue demo, filters, cart and language switch.
-2. **Real catalogue model** — product detail pages, variants, product image strategy and product data validation.
-3. **Backend and database** — API, persistence, stock and order lifecycle.
-4. **Admin panel** — login, products/media, categories and orders.
-5. **Checkout integration** — validated order creation, delivery calculation and notifications.
-6. **Production readiness** — tests, accessibility, SEO, security review, policies and deployment.
+1. **Storefront foundation** — implemented: responsive storefront, catalogue UI, filters, cart and FR/AR switch.
+2. **Supabase integration and admin** — schema, auth/role gate, product CRUD, landing-page publishing and order status management implemented; owner configuration still required.
+3. **Order flow** — database-backed checkout and stock validation implemented; delivery fee rules, customer notifications and cancellation/return operational process still need work.
+4. **Product details and media** — size/colour variants, product detail pages and Supabase Storage upload.
+5. **Production readiness** — newsletter integration, legal pages, tests, accessibility, SEO, security review and deployment.
 
 ## Data model (initial proposal)
 
