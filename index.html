@@ -10,7 +10,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>\n  <script src="./supabase-config.js"></script>\n  <script src="./app.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./supabase-config.js"></script>
+  <script src="./app.js" defer></script>
 </head>
 <body>
   <div class="announcement" data-i18n="announcement">Livraison partout au Maroc · Une élégance qui vous ressemble</div>
@@ -97,7 +99,7 @@
     <div class="cart-header"><div><p class="eyebrow" data-i18n="yourSelection">VOTRE SÉLECTION</p><h2 data-i18n="yourCart">Votre panier</h2></div><button class="icon-button" id="cart-close" aria-label="Fermer le panier">✕</button></div>
     <div class="cart-items" id="cart-items"></div>
     <div class="cart-empty" id="cart-empty"><span>◇</span><p data-i18n="emptyCart">Votre panier attend sa première pièce.</p><button class="text-link" id="continue-shopping" data-i18n="continueShopping">Continuer mes découvertes ↗</button></div>
-    <div class="cart-footer"><div class="cart-total"><span data-i18n="subtotal">Sous-total</span><strong id="cart-total">0 DH</strong></div><p data-i18n="shippingNote">Livraison calculée lors de la confirmation.</p><button class="button button-dark checkout-button" id="checkout-button" data-i18n="orderWhatsApp">Commander via WhatsApp ↗</button><p class="checkout-note" data-i18n="checkoutNote">La commande sera préparée dans un message WhatsApp à confirmer.</p></div>
+    <div class="cart-footer"><div class="cart-total"><span data-i18n="subtotal">Sous-total</span><strong id="cart-total">0 DH</strong></div><p data-i18n="shippingNote">Livraison calculée lors de la confirmation.</p><button class="button button-dark checkout-button" id="checkout-button" data-i18n="orderWhatsApp">Commander ↗</button><p class="checkout-note" data-i18n="checkoutNote">Renseigne tes coordonnées pour confirmer la commande.</p><form id="checkout-form" class="checkout-form" hidden><label>Nom complet<input id="checkout-name" autocomplete="name" required maxlength="120" placeholder="Nom et prénom"></label><label>Téléphone<input id="checkout-phone" type="tel" autocomplete="tel" required maxlength="30" placeholder="+212…"></label><label>Ville<input id="checkout-city" autocomplete="address-level2" required maxlength="100" placeholder="Casablanca"></label><label>Adresse de livraison<textarea id="checkout-address" autocomplete="street-address" required maxlength="500" rows="2" placeholder="Quartier, rue, numéro…"></textarea></label><button class="button button-dark" type="submit" id="submit-order">Confirmer la commande</button><p class="checkout-form-feedback" id="checkout-feedback" role="status"></p></form></div>
   </aside>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>
