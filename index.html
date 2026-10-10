@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f7f4ee" />
+  <meta name="description" content="BOUTIBLANCA — une sélection raffinée de caftans, takchitas et jellabas marocaines." />
+  <title>BOUTIBLANCA — L'élégance marocaine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <div class="announcement" data-i18n="announcement">Livraison partout au Maroc · Une élégance qui vous ressemble</div>
+  <header class="site-header">
+    <button class="icon-button mobile-menu" id="mobile-menu" aria-label="Ouvrir le menu"><span>☰</span></button>
+    <a class="wordmark" href="#" aria-label="BOUTIBLANCA accueil">BOUTI<span>BLANCA</span><small>MAISON MAROCAINE</small></a>
+    <nav class="main-nav" id="main-nav" aria-label="Navigation principale">
+      <a href="#collection" data-i18n="navCollection">Collection</a>
+      <a href="#categories" data-i18n="navCategories">Catégories</a>
+      <a href="#story" data-i18n="navStory">Notre histoire</a>
+    </nav>
+    <div class="header-actions">
+      <button class="language-switch" id="language-switch" aria-label="Switch language">عربي</button>
+      <button class="icon-button cart-trigger" id="cart-trigger" aria-label="Ouvrir le panier">Panier <span class="cart-count" id="cart-count">0</span></button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow" data-i18n="heroEyebrow">L'art de l'élégance marocaine</p>
+        <h1 data-i18n="heroTitle">Tradition précieuse.<br><em>Allure intemporelle.</em></h1>
+        <p class="hero-description" data-i18n="heroDescription">Des pièces choisies avec soin, inspirées par la richesse du savoir-faire marocain et pensées pour vos plus beaux moments.</p>
+        <a class="button button-dark" href="#collection" data-i18n="discover">Découvrir la collection <span aria-hidden="true">↗</span></a>
+        <div class="hero-note"><span class="ornament">✳</span><span data-i18n="heroNote">Un héritage à porter, une histoire à raconter.</span></div>
+      </div>
+      <div class="hero-art" role="img" aria-label="Ambiance éditoriale de mode marocaine">
+        <div class="hero-image image-caftan"></div>
+        <div class="hero-stamp"><span>ÉDITION</span><strong>MAROCAINE</strong><span>✳ DEPUIS TOUJOURS</span></div>
+        <div class="hero-caption">LE CHARME DU FAIT MAIN <span>—</span> MOROCCO</div>
+      </div>
+    </section>
+
+    <section class="trust-strip" aria-label="Nos engagements">
+      <div><span>✳</span><p data-i18n="trustCraft">Savoir-faire marocain</p></div>
+      <div><span>◇</span><p data-i18n="trustSelection">Sélection soignée</p></div>
+      <div><span>↗</span><p data-i18n="trustDelivery">Livraison au Maroc</p></div>
+    </section>
+
+    <section class="category-section section-wrap" id="categories">
+      <div class="section-heading">
+        <div><p class="eyebrow" data-i18n="categoryEyebrow">Trouver votre pièce</p><h2 data-i18n="categoryTitle">Un style, mille histoires.</h2></div>
+        <a class="text-link" href="#collection" data-i18n="viewAll">Voir toute la collection ↗</a>
+      </div>
+      <div class="category-grid">
+        <button class="category-card category-caftan" data-category="Caftan"><span class="category-number">01 / 03</span><span class="category-label">Caftans <span>↗</span></span></button>
+        <button class="category-card category-takchita" data-category="Takchita"><span class="category-number">02 / 03</span><span class="category-label">Takchitas <span>↗</span></span></button>
+        <button class="category-card category-jellaba" data-category="Jellaba"><span class="category-number">03 / 03</span><span class="category-label">Jellabas <span>↗</span></span></button>
+      </div>
+    </section>
+
+    <section class="collection-section section-wrap" id="collection">
+      <div class="section-heading collection-heading">
+        <div><p class="eyebrow" data-i18n="collectionEyebrow">Nos coups de cœur</p><h2 data-i18n="collectionTitle">La collection BOUTIBLANCA</h2></div>
+        <label class="search-box"><span aria-hidden="true">⌕</span><input id="product-search" type="search" placeholder="Rechercher une pièce..." data-i18n-placeholder="searchPlaceholder" /><span class="sr-only">Rechercher un produit</span></label>
+      </div>
+      <div class="filter-row" id="filter-row">
+        <button class="filter-chip active" data-filter="Tous" data-i18n="filterAll">Tout voir</button>
+        <button class="filter-chip" data-filter="Caftan">Caftans</button>
+        <button class="filter-chip" data-filter="Takchita">Takchitas</button>
+        <button class="filter-chip" data-filter="Jellaba">Jellabas</button>
+        <span class="result-count" id="result-count"></span>
+      </div>
+      <div class="product-grid" id="product-grid" aria-live="polite"></div>
+    </section>
+
+    <section class="story-section" id="story">
+      <div class="story-image"></div>
+      <div class="story-copy"><p class="eyebrow" data-i18n="storyEyebrow">Notre philosophie</p><h2 data-i18n="storyTitle">Le Maroc dans chaque détail.</h2><p data-i18n="storyText">BOUTIBLANCA célèbre une élégance qui traverse les générations. Des lignes intemporelles, des matières choisies et ce petit détail qui rend chaque pièce unique.</p><a class="text-link" href="#collection" data-i18n="storyLink">Explorer nos pièces ↗</a></div>
+    </section>
+
+    <section class="newsletter section-wrap">
+      <p class="eyebrow" data-i18n="newsletterEyebrow">Les nouvelles de la maison</p><h2 data-i18n="newsletterTitle">Une touche d'inspiration, de temps en temps.</h2>
+      <p data-i18n="newsletterText">La collection, les nouveautés et nos histoires directement dans votre boîte mail.</p>
+      <form id="newsletter-form"><input type="email" id="newsletter-email" placeholder="Votre adresse e-mail" required /><button class="button button-dark" type="submit" data-i18n="subscribe">S'inscrire ↗</button></form>
+      <p class="form-feedback" id="newsletter-feedback" role="status"></p>
+    </section>
+  </main>
+
+  <footer class="site-footer"><a class="wordmark footer-wordmark" href="#">BOUTI<span>BLANCA</span><small>MAISON MAROCAINE</small></a><p data-i18n="footerText">L'élégance marocaine, avec intention.</p><div class="footer-links"><a href="#collection" data-i18n="navCollection">Collection</a><a href="#story" data-i18n="navStory">Notre histoire</a><a href="mailto:bonjour@boutiblanca.ma">Contact</a></div><small>© <span id="year"></span> BOUTIBLANCA. <span data-i18n="rights">Tous droits réservés.</span></small></footer>
+
+  <div class="cart-backdrop" id="cart-backdrop"></div>
+  <aside class="cart-drawer" id="cart-drawer" aria-label="Votre panier" aria-hidden="true">
+    <div class="cart-header"><div><p class="eyebrow" data-i18n="yourSelection">VOTRE SÉLECTION</p><h2 data-i18n="yourCart">Votre panier</h2></div><button class="icon-button" id="cart-close" aria-label="Fermer le panier">✕</button></div>
+    <div class="cart-items" id="cart-items"></div>
+    <div class="cart-empty" id="cart-empty"><span>◇</span><p data-i18n="emptyCart">Votre panier attend sa première pièce.</p><button class="text-link" id="continue-shopping" data-i18n="continueShopping">Continuer mes découvertes ↗</button></div>
+    <div class="cart-footer"><div class="cart-total"><span data-i18n="subtotal">Sous-total</span><strong id="cart-total">0 DH</strong></div><p data-i18n="shippingNote">Livraison calculée lors de la confirmation.</p><button class="button button-dark checkout-button" id="checkout-button" data-i18n="orderWhatsApp">Commander via WhatsApp ↗</button><p class="checkout-note" data-i18n="checkoutNote">La commande sera préparée dans un message WhatsApp à confirmer.</p></div>
+  </aside>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
