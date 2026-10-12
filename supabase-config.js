@@ -1,8 +1,6 @@
-// BOUTIBLANCA — configuration publique du client Supabase.
-// Renseigne l'URL et la clé anon/public de TON projet Supabase.
-// Ne mets JAMAIS une clé service_role dans ce fichier.
+// BOUTIBLANCA — configuration publique du client Supabase et paramètres boutique.
 window.BOUTIBLANCA_CONFIG = {
   SUPABASE_URL: "https://qqvnzfidxzfltccvrvdr.supabase.co",
   SUPABASE_ANON_KEY: "sb_publishable_Ji86YH3r3f_K4F5n9gCM3g_fYZYmp42",
-  WHATSAPP_NUMBER: ""
+  WHATSAPP_NUMBER: "212658043555"
 };
