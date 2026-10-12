@@ -1608,6 +1608,7 @@ img {
 html[dir="rtl"] body {
   font-family: var(--font-ar);
   text-align: right;
+  direction: rtl;
 }
 
 html[dir="rtl"] .wordmark small {
@@ -1643,6 +1644,85 @@ html[dir="rtl"] .hero-stamp-gold {
 html[dir="rtl"] .hero-floating-card {
   left: auto;
   right: -20px;
+}
+
+html[dir="rtl"] .card-details {
+  text-align: right;
+  direction: rtl;
+}
+
+html[dir="rtl"] .card-desc {
+  text-align: right;
+  direction: rtl;
+}
+
+html[dir="rtl"] .card-category {
+  text-align: right;
+}
+
+html[dir="rtl"] .card-title {
+  text-align: right;
+}
+
+html[dir="rtl"] .card-footer {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .btn-card-quickview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+html[dir="rtl"] .hero-content {
+  text-align: right;
+}
+
+html[dir="rtl"] .hero-subtitle-tag {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .hero-cta-group {
+  justify-content: flex-start;
+}
+
+html[dir="rtl"] .top-carousel-header {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .carousel-controls {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .collection-toolbar {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .trust-card {
+  text-align: right;
+}
+
+html[dir="rtl"] .heritage-text {
+  text-align: right;
+}
+
+html[dir="rtl"] .vip-wa-banner {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+html[dir="rtl"] .footer-top {
+  direction: rtl;
+  text-align: right;
+}
+
+html[dir="rtl"] .footer-brand {
+  text-align: right;
+}
+
+html[dir="rtl"] .footer-brand .wordmark {
+  align-items: flex-start;
 }
 
 /* ==========================================================================

@@ -1,6 +1,6 @@
 /* ==========================================================================
-   BOUTIBLANCA — PROTOTYPE PRESTIGE
-   Style Marocain Pur · Couleurs Tendances · Haute Couture & Prestige
+   BOUTIBLANCA — PRODUCTION PRESTIGE
+   Style Marocain Pur · Couleurs Tendances · Haute Tradition & Luxe
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap');
@@ -50,9 +50,6 @@
   --transition-smooth: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ==========================================================================
-   Base & Reset
-   ========================================================================== */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -103,9 +100,6 @@ img {
   display: block;
 }
 
-/* ==========================================================================
-   Motifs Zellige et Ornements Marocains
-   ========================================================================== */
 .pattern-bg {
   background-image: radial-gradient(rgba(197, 160, 89, 0.12) 1px, transparent 1px);
   background-size: 24px 24px;
@@ -308,7 +302,7 @@ img {
 }
 
 /* ==========================================================================
-   CARROUSEL DU HAUT : TOUS LES 20 ARTICLES (HIGHLIGHT SECTION)
+   CARROUSEL DU HAUT : ARTICLES EN VEDETTE
    ========================================================================== */
 .top-carousel-section {
   padding: 40px 0 50px;
@@ -402,7 +396,6 @@ img {
   color: #fff;
 }
 
-/* Track & Slides */
 .carousel-viewport {
   width: 100%;
   overflow-x: auto;
@@ -427,7 +420,6 @@ img {
   width: max-content;
 }
 
-/* Carte Carrousel Haute Couture */
 .carousel-card {
   width: 290px;
   background: #ffffff;
@@ -783,7 +775,6 @@ img {
   text-transform: uppercase;
 }
 
-/* Image Arche Marocaine */
 .hero-visual {
   position: relative;
   display: flex;
@@ -1617,6 +1608,7 @@ img {
 html[dir="rtl"] body {
   font-family: var(--font-ar);
   text-align: right;
+  direction: rtl;
 }
 
 html[dir="rtl"] .wordmark small {
@@ -1652,6 +1644,85 @@ html[dir="rtl"] .hero-stamp-gold {
 html[dir="rtl"] .hero-floating-card {
   left: auto;
   right: -20px;
+}
+
+html[dir="rtl"] .card-details {
+  text-align: right;
+  direction: rtl;
+}
+
+html[dir="rtl"] .card-desc {
+  text-align: right;
+  direction: rtl;
+}
+
+html[dir="rtl"] .card-category {
+  text-align: right;
+}
+
+html[dir="rtl"] .card-title {
+  text-align: right;
+}
+
+html[dir="rtl"] .card-footer {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .btn-card-quickview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+html[dir="rtl"] .hero-content {
+  text-align: right;
+}
+
+html[dir="rtl"] .hero-subtitle-tag {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .hero-cta-group {
+  justify-content: flex-start;
+}
+
+html[dir="rtl"] .top-carousel-header {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .carousel-controls {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .collection-toolbar {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .trust-card {
+  text-align: right;
+}
+
+html[dir="rtl"] .heritage-text {
+  text-align: right;
+}
+
+html[dir="rtl"] .vip-wa-banner {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+html[dir="rtl"] .footer-top {
+  direction: rtl;
+  text-align: right;
+}
+
+html[dir="rtl"] .footer-brand {
+  text-align: right;
+}
+
+html[dir="rtl"] .footer-brand .wordmark {
+  align-items: flex-start;
 }
 
 /* ==========================================================================

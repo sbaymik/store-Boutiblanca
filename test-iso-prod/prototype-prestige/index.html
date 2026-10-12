@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#c5a059" />
-  <meta name="description" content="BOUTIBLANCA — Maison de Haute Tradition Marocaine. Caftans d'apparat, Takchitas de mariée, Jellabas en crêpe de soie et ét городской étoffes." />
+  <meta name="description" content="BOUTIBLANCA — Maison de Haute Tradition Marocaine. Caftans d'apparat, Takchitas de mariée, Jellabas en crêpe de soie et étoffes d'exception." />
   <title>BOUTIBLANCA — Maison de Haute Tradition Marocaine</title>
   
   <link rel="stylesheet" href="./styles.css" />
@@ -17,7 +17,7 @@
   <!-- BANNIÈRE SUPÉRIEURE -->
   <div class="announcement-bar" id="top-announcement">
     <span class="ornament-star">✦</span>
-    <p id="top-announcement-text">Livraison Partout au Maroc & International <span>·</span> Haute Tradition & Broderie d'Apparat</p>
+    <p id="top-announcement-text" data-i18n="announcement">Livraison Partout au Maroc & International <span>·</span> Haute Tradition & Broderie d'Apparat</p>
     <span class="ornament-star">✦</span>
   </div>
 
@@ -33,20 +33,19 @@
     </div>
 
     <nav class="main-nav" id="main-nav-bar">
-      <a href="#top-carousel" class="active">Les 20 Créations</a>
-      <a href="#categories">Catégories</a>
-      <a href="#collection">Collection Complète</a>
-      <a href="#heritage">Notre Héritage</a>
-      <a href="./admin.html" style="color: var(--gold-dark); font-weight: 700;">⚙ Studio Admin</a>
+      <a href="#top-carousel" class="active" data-i18n="navCarousel">Sélection</a>
+      <a href="#categories" data-i18n="navCategories">Catégories</a>
+      <a href="#collection" data-i18n="navCollection">Collection</a>
+      <a href="#heritage" data-i18n="navHeritage">Notre Héritage</a>
     </nav>
 
     <div class="header-actions">
-      <a class="btn-header-wa" href="https://wa.me/212600000000?text=Bonjour%20BOUTIBLANCA%2C%20je%20souhaite%20un%20conseil%20personnalis%C3%A9" target="_blank" rel="noopener noreferrer">
-        <span>💬</span> <span>WhatsApp VIP</span>
+      <a class="btn-header-wa" id="btn-header-wa" href="https://wa.me/212658043555?text=Bonjour%20BOUTIBLANCA%2C%20je%20souhaite%20un%20conseil%20personnalis%C3%A9" target="_blank" rel="noopener noreferrer">
+        <span>💬</span> <span data-i18n="waVip">WhatsApp VIP</span>
       </a>
       <button class="language-switch" id="language-switch" aria-label="Changer de langue">عربي</button>
       <button class="cart-trigger" id="cart-trigger" aria-label="Voir le panier">
-        <span>Panier</span>
+        <span data-i18n="cartLabel">Panier</span>
         <span class="cart-count" id="cart-count">0</span>
       </button>
     </div>
@@ -54,20 +53,22 @@
 
   <main>
     <!-- ==========================================================================
-         CARROUSEL DU HAUT : TOUS LES 20 ARTICLES (DEMANDE UTILISATEUR)
+         CARROUSEL DU HAUT : ARTICLES EN VEDETTE
          ========================================================================== -->
     <section class="top-carousel-section" id="top-carousel">
       <div class="top-carousel-header">
         <div>
           <div class="section-label">
             <span class="ornament-star">✦</span>
-            <span>Sélection Signature</span>
+            <span data-i18n="topCarouselTag">Sélection Signature</span>
             <span class="ornament-star">✦</span>
           </div>
-          <h2 class="section-title">La Sélection Impériale · <em>Nos 20 Pièces</em></h2>
+          <h2 class="section-title" id="top-carousel-title" data-i18n="topCarouselTitle">La Sélection Impériale · <em>Créations de la Maison</em></h2>
         </div>
         <div class="carousel-controls">
-          <button class="carousel-autoplay-btn active" id="carousel-autoplay-btn"><span>⏸</span> Pause</button>
+          <button class="carousel-autoplay-btn active" id="carousel-autoplay-btn">
+            <span id="autoplay-icon">⏸</span> <span id="autoplay-text" data-i18n="carouselPause">Pause</span>
+          </button>
           <button class="carousel-nav-btn" id="carousel-btn-prev" aria-label="Précédent">‹</button>
           <button class="carousel-nav-btn" id="carousel-btn-next" aria-label="Suivant">›</button>
         </div>
@@ -75,7 +76,7 @@
 
       <div class="carousel-viewport" id="top-carousel-viewport">
         <div class="carousel-track" id="top-carousel-track">
-          <!-- Les 20 articles sont injectés ici dynamiquement par app.js -->
+          <!-- Les articles sont injectés dynamiquement par app.js -->
         </div>
       </div>
     </section>
@@ -103,39 +104,38 @@
       <div class="hero-content">
         <div class="hero-subtitle-tag">
           <span class="ornament-star">✦</span>
-          <span>Maison de Haute Tradition Marocaine</span>
+          <span data-i18n="heroBadge">Maison de Haute Tradition Marocaine</span>
         </div>
-        <h1 class="hero-title" id="hero-main-title">
+        <h1 class="hero-title" id="hero-main-title" data-i18n="heroTitle">
           L'art du caftan impérial.<br />
           <em>Une allure sans égale.</em>
         </h1>
-        <p class="hero-paragraph" id="hero-main-desc">
+        <p class="hero-paragraph" id="hero-main-desc" data-i18n="heroDescription">
           Chaque création BOUTIBLANCA rend hommage au raffinement séculaire du costume marocain. Des soies tissées à Fès, des velours d'exception et une passementerie délicate façonnée au fil d'or skalli.
         </p>
 
         <div class="hero-cta-group">
           <a class="btn-primary-gold" href="#collection">
-            <span>Explorer la Collection</span>
-            <span>↗</span>
+            <span data-i18n="discover">Explorer la Collection ↗</span>
           </a>
-          <a class="btn-outline-wa" id="hero-wa-btn" href="https://wa.me/212600000000?text=Bonjour%20BOUTIBLANCA%2C%20je%20souhaite%20un%20conseil%20pour%20une%20cr%C3%A9ation" target="_blank" rel="noopener noreferrer">
+          <a class="btn-outline-wa" id="hero-wa-btn" href="https://wa.me/212658043555?text=Bonjour%20BOUTIBLANCA%2C%20je%20souhaite%20un%20conseil%20pour%20une%20cr%C3%A9ation" target="_blank" rel="noopener noreferrer">
             <span>💬</span>
-            <span>Conseil Privé WhatsApp</span>
+            <span data-i18n="directWa">Conseil Privé WhatsApp</span>
           </a>
         </div>
 
         <div class="hero-stats">
           <div class="stat-item">
-            <strong>20</strong>
-            <span>Créations Uniques</span>
+            <strong data-i18n="statCraft">Haute Façon</strong>
+            <span data-i18n="statCraftSub">Créations Exclusives</span>
           </div>
           <div class="stat-item">
-            <strong>100%</strong>
-            <span>Fait Main d'Artisan</span>
+            <strong data-i18n="statHandmade">100%</strong>
+            <span data-i18n="statHandmadeSub">Fait Main d'Artisan</span>
           </div>
           <div class="stat-item">
-            <strong>Maroc</strong>
-            <span>Livraison Sécurisée</span>
+            <strong data-i18n="statDelivery">Maroc</strong>
+            <span data-i18n="statDeliverySub">Livraison Sécurisée</span>
           </div>
         </div>
       </div>
@@ -144,15 +144,15 @@
         <div class="hero-arch-wrapper">
           <img class="hero-arch-image" id="hero-arch-img" src="https://i.pinimg.com/originals/b0/82/9a/b0829aff252d5c80d5798fd5d9fae49a.jpg" alt="Caftan Marocain de Haute Couture BOUTIBLANCA" />
           <div class="hero-stamp-gold">
-            <span>ÉDITION</span>
-            <strong>MAISON</strong>
-            <span>✦ ROYALE ✦</span>
+            <span data-i18n="sealEdition">ÉDITION</span>
+            <strong data-i18n="sealMaison">MAISON</strong>
+            <span data-i18n="sealRoyale">✦ ROYALE ✦</span>
           </div>
           <div class="hero-floating-card">
             <span class="icon-seal">۞</span>
             <div>
-              <strong>Haute Façon Fassie</strong>
-              <span>Broderie & Aqqads sur-mesure</span>
+              <strong data-i18n="floatingCraftTitle">Haute Façon Fassie</strong>
+              <span data-i18n="floatingCraftDesc">Broderie & Aqqads sur-mesure</span>
             </div>
           </div>
         </div>
@@ -167,29 +167,29 @@
         <div class="trust-card">
           <div class="trust-icon-box">✦</div>
           <div>
-            <strong>Artisanat d'Exception</strong>
-            <p>Confectionné point par point par nos maâllems à Fès et Marrakech.</p>
+            <strong data-i18n="trustCraftTitle">Artisanat d'Exception</strong>
+            <p data-i18n="trustCraftDesc">Confectionné point par point par nos maâllems à Fès et Marrakech.</p>
           </div>
         </div>
         <div class="trust-card">
           <div class="trust-icon-box">💎</div>
           <div>
-            <strong>Matières Nobles</strong>
-            <p>Soie Jawhara pure, velours Mobra et fil d'or Skalli authentique.</p>
+            <strong data-i18n="trustMaterialsTitle">Matières Nobles</strong>
+            <p data-i18n="trustMaterialsDesc">Soie Jawhara pure, velours Mobra et fil d'or Skalli authentique.</p>
           </div>
         </div>
         <div class="trust-card">
           <div class="trust-icon-box">📦</div>
           <div>
-            <strong>Livraison Partout au Maroc</strong>
-            <p>Expédition soignée et sécurisée dans un coffret de protection de luxe.</p>
+            <strong data-i18n="trustDeliveryTitle">Livraison Partout au Maroc</strong>
+            <p data-i18n="trustDeliveryDesc">Expédition soignée et sécurisée dans un coffret de protection de luxe.</p>
           </div>
         </div>
         <div class="trust-card">
           <div class="trust-icon-box">💬</div>
           <div>
-            <strong>Conciergerie WhatsApp</strong>
-            <p>Échanges directs, conseils personnalisés et accompagnement sur-mesure.</p>
+            <strong data-i18n="trustWaTitle">Conciergerie WhatsApp</strong>
+            <p data-i18n="trustWaDesc">Échanges directs, conseils personnalisés et accompagnement sur-mesure.</p>
           </div>
         </div>
       </div>
@@ -202,10 +202,10 @@
       <div class="section-head-center">
         <div class="section-label">
           <span class="ornament-star">✦</span>
-          <span>L'Univers de la Maison</span>
+          <span data-i18n="catEyebrow">L'Univers de la Maison</span>
           <span class="ornament-star">✦</span>
         </div>
-        <h2 class="section-title">Cinq Étoffes, Mille Émotions</h2>
+        <h2 class="section-title" data-i18n="catTitle">Cinq Étoffes, Mille Émotions</h2>
       </div>
 
       <div class="categories-grid">
@@ -214,8 +214,8 @@
           <div class="cat-tile-overlay">
             <span class="cat-number">01 / 05</span>
             <div class="cat-info">
-              <h3>Caftans</h3>
-              <span>Découvrir les pièces ↗</span>
+              <h3 data-i18n="catCaftans">Caftans</h3>
+              <span data-i18n="catDiscover">Découvrir les pièces ↗</span>
             </div>
           </div>
         </article>
@@ -225,8 +225,8 @@
           <div class="cat-tile-overlay">
             <span class="cat-number">02 / 05</span>
             <div class="cat-info">
-              <h3>Takchitas</h3>
-              <span>Découvrir les pièces ↗</span>
+              <h3 data-i18n="catTakchitas">Takchitas</h3>
+              <span data-i18n="catDiscover">Découvrir les pièces ↗</span>
             </div>
           </div>
         </article>
@@ -236,8 +236,8 @@
           <div class="cat-tile-overlay">
             <span class="cat-number">03 / 05</span>
             <div class="cat-info">
-              <h3>Jellabas</h3>
-              <span>Découvrir les pièces ↗</span>
+              <h3 data-i18n="catJellabas">Jellabas</h3>
+              <span data-i18n="catDiscover">Découvrir les pièces ↗</span>
             </div>
           </div>
         </article>
@@ -247,8 +247,8 @@
           <div class="cat-tile-overlay">
             <span class="cat-number">04 / 05</span>
             <div class="cat-info">
-              <h3>Foulards</h3>
-              <span>Découvrir les pièces ↗</span>
+              <h3 data-i18n="catFoulards">Foulards</h3>
+              <span data-i18n="catDiscover">Découvrir les pièces ↗</span>
             </div>
           </div>
         </article>
@@ -258,8 +258,8 @@
           <div class="cat-tile-overlay">
             <span class="cat-number">05 / 05</span>
             <div class="cat-info">
-              <h3>Châles & Selhams</h3>
-              <span>Découvrir les pièces ↗</span>
+              <h3 data-i18n="catChales">Châles & Selhams</h3>
+              <span data-i18n="catDiscover">Découvrir les pièces ↗</span>
             </div>
           </div>
         </article>
@@ -274,24 +274,24 @@
         <div>
           <div class="section-label">
             <span class="ornament-star">✦</span>
-            <span>Le Catalogue Complet</span>
+            <span data-i18n="collectionEyebrow">Le Catalogue Exclusif</span>
           </div>
-          <h2 class="section-title">L'Intégralité de nos <em>Créations</em></h2>
+          <h2 class="section-title" data-i18n="collectionTitle">L'Intégralité de nos <em>Créations</em></h2>
         </div>
 
         <div class="search-input-box">
           <span aria-hidden="true">🔍</span>
-          <input type="search" id="search-input" placeholder="Rechercher une pièce, tissu, couleur…" aria-label="Rechercher" />
+          <input type="search" id="search-input" placeholder="Rechercher une pièce, tissu, couleur…" data-i18n-placeholder="searchPlaceholder" aria-label="Rechercher" />
         </div>
       </div>
 
       <div class="filters-group" style="margin-bottom: 30px;">
-        <button class="filter-btn active" data-filter="Tous">Toutes les Pièces (20)</button>
-        <button class="filter-btn" data-filter="Caftan">Caftans</button>
-        <button class="filter-btn" data-filter="Takchita">Takchitas</button>
-        <button class="filter-btn" data-filter="Jellaba">Jellabas</button>
-        <button class="filter-btn" data-filter="Foulard">Foulards & Hijabs</button>
-        <button class="filter-btn" data-filter="Châle">Châles & Selhams</button>
+        <button class="filter-btn active" data-filter="Tous" data-i18n="filterAll">Toutes les Pièces</button>
+        <button class="filter-btn" data-filter="Caftan" data-i18n="filterCaftan">Caftans</button>
+        <button class="filter-btn" data-filter="Takchita" data-i18n="filterTakchita">Takchitas</button>
+        <button class="filter-btn" data-filter="Jellaba" data-i18n="filterJellaba">Jellabas</button>
+        <button class="filter-btn" data-filter="Foulard" data-i18n="filterFoulard">Foulards & Hijabs</button>
+        <button class="filter-btn" data-filter="Châle" data-i18n="filterChale">Châles & Selhams</button>
       </div>
 
       <div class="products-grid" id="products-grid" aria-live="polite">
@@ -304,14 +304,14 @@
          ========================================================================== -->
     <section class="vip-wa-banner">
       <div class="vip-wa-content">
-        <h2>Une Création Sur-Mesure ?</h2>
-        <p>
+        <h2 data-i18n="vipWaTitle">Une Création Sur-Mesure ?</h2>
+        <p data-i18n="vipWaDesc">
           Nos maîtres artisans réalisent également vos tenues d'apparat sur mesure (choix du tissu, broderies sfifa personnalisées, perlage spécifique). Échangez directement avec notre conseillère privée via WhatsApp.
         </p>
       </div>
-      <a class="btn-vip-wa" href="https://wa.me/212600000000?text=Salam%20BOUTIBLANCA%2C%20je%20souhaite%20un%20devis%20pour%20une%20cr%C3%A9ation%20sur-mesure" target="_blank" rel="noopener noreferrer">
+      <a class="btn-vip-wa" href="https://wa.me/212658043555?text=Salam%20BOUTIBLANCA%2C%20je%20souhaite%20un%20devis%20pour%20une%20cr%C3%A9ation%20sur-mesure" target="_blank" rel="noopener noreferrer">
         <span>💬</span>
-        <span>Discuter sur WhatsApp</span>
+        <span data-i18n="vipWaBtn">Discuter sur WhatsApp</span>
       </a>
     </section>
 
@@ -327,24 +327,24 @@
         <div class="heritage-text">
           <div class="section-label">
             <span class="ornament-star">✦</span>
-            <span>Transmission & Passion</span>
+            <span data-i18n="heritageEyebrow">Transmission & Passion</span>
           </div>
-          <h2>Le Maroc dans chaque point d'aiguille.</h2>
-          <p>
+          <h2 data-i18n="heritageTitle">Le Maroc dans chaque point d'aiguille.</h2>
+          <p data-i18n="heritageP1">
             BOUTIBLANCA est née d'un amour inconditionnel pour les arts traditionnels marocains. De la broderie tarz fassi au travail minutieux de la randa, chaque pièce reflète la patience et la dextérité de nos maâllems.
           </p>
-          <p>
+          <p data-i18n="heritageP2">
             Nous sélectionnons des soies fines et des velours d'exception pour que chaque apparition soit un moment de grâce et de fierté culturelle.
           </p>
           <a class="btn-primary-gold" href="#collection" style="margin-top: 15px;">
-            <span>Découvrir nos pièces ↗</span>
+            <span data-i18n="heritageBtn">Découvrir nos pièces ↗</span>
           </a>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- PIED DE PAGE -->
+  <!-- PIED DE PAGE (SANS LIEN ADMIN) -->
   <footer class="site-footer">
     <div class="footer-top">
       <div class="footer-brand">
@@ -352,49 +352,49 @@
           BOUTI<span>BLANCA</span>
           <small>MAISON MAROCAINE</small>
         </div>
-        <p>L'excellence de la haute couture traditionnelle marocaine. Des pièces précieuses pour célébrer les plus beaux instants de la vie.</p>
+        <p data-i18n="footerDesc">L'excellence de la haute couture traditionnelle marocaine. Des pièces précieuses pour célébrer les plus beaux instants de la vie.</p>
       </div>
 
       <div class="footer-col">
-        <h4>Nos Collections</h4>
+        <h4 data-i18n="footerCollections">Nos Collections</h4>
         <ul>
-          <li><a href="#collection">Caftans Impériaux</a></li>
-          <li><a href="#collection">Takchitas de Mariée</a></li>
-          <li><a href="#collection">Jellabas en Crêpe</a></li>
-          <li><a href="#collection">Foulards de Soie</a></li>
-          <li><a href="#collection">Châles & Selhams</a></li>
+          <li><a href="#collection" data-i18n="catCaftans">Caftans Impériaux</a></li>
+          <li><a href="#collection" data-i18n="catTakchitas">Takchitas de Mariée</a></li>
+          <li><a href="#collection" data-i18n="catJellabas">Jellabas en Crêpe</a></li>
+          <li><a href="#collection" data-i18n="catFoulards">Foulards de Soie</a></li>
+          <li><a href="#collection" data-i18n="catChales">Châles & Selhams</a></li>
         </ul>
       </div>
 
       <div class="footer-col">
-        <h4>Conciergerie & Service</h4>
+        <h4 data-i18n="footerServices">Conciergerie & Service</h4>
         <ul>
-          <li><a href="https://wa.me/212600000000" target="_blank">Commander via WhatsApp</a></li>
-          <li><a href="https://wa.me/212600000000" target="_blank">Guide des Tailles & Mesures</a></li>
-          <li><a href="#top-carousel">Livraison & Délais</a></li>
-          <li><a href="./admin.html">Espace Gestion</a></li>
+          <li><a href="https://wa.me/212658043555" target="_blank">Commander via WhatsApp</a></li>
+          <li><a href="https://wa.me/212658043555" target="_blank">Guide des Tailles & Mesures</a></li>
+          <li><a href="#top-carousel">Livraison Partout au Maroc</a></li>
+          <li><a href="#collection">Commandes Sécurisées</a></li>
         </ul>
       </div>
 
       <div class="footer-col">
-        <h4>Contact Privé</h4>
+        <h4 data-i18n="footerContact">Contact Privé</h4>
         <ul>
           <li><span>📍 Casablanca & Fès, Maroc</span></li>
-          <li><span>💬 WhatsApp : +212 6 00 00 00 00</span></li>
+          <li><span>💬 WhatsApp : +212 6 58 04 35 55</span></li>
           <li><span>✉ contact@boutiblanca.ma</span></li>
         </ul>
       </div>
     </div>
 
     <div class="footer-bottom">
-      <p>© <span id="current-year"></span> BOUTIBLANCA. Tous droits réservés.</p>
-      <p>Maison Marocaine de Haute Tradition · Fait main avec passion.</p>
+      <p>© <span id="current-year"></span> BOUTIBLANCA. <span data-i18n="footerRights">Tous droits réservés.</span></p>
+      <p data-i18n="footerHeritageNote">Maison Marocaine de Haute Tradition · Fait main avec passion.</p>
     </div>
   </footer>
 
   <!-- BOUTON FLOTTANT WHATSAPP TOUJOURS ACCESSIBLE -->
-  <a class="floating-wa-button" id="floating-wa-btn" href="https://wa.me/212600000000?text=Bonjour%20BOUTIBLANCA%2C%20je%20souhaite%20un%20conseil" target="_blank" rel="noopener noreferrer" aria-label="Contacter sur WhatsApp">
-    <span class="floating-wa-pill">Conseillère en direct 💬</span>
+  <a class="floating-wa-button" id="floating-wa-btn" href="https://wa.me/212658043555?text=Bonjour%20BOUTIBLANCA%2C%20je%20souhaite%20un%20conseil" target="_blank" rel="noopener noreferrer" aria-label="Contacter sur WhatsApp">
+    <span class="floating-wa-pill" id="floating-wa-text" data-i18n="floatingWaPill">Conseillère en direct 💬</span>
     <span class="floating-wa-circle">💬</span>
   </a>
 
@@ -414,10 +414,10 @@
       
       <div class="modal-actions">
         <a class="btn-modal-wa" id="modal-btn-wa" href="" target="_blank" rel="noopener noreferrer">
-          <span>💬</span> <span>Commander directement sur WhatsApp</span>
+          <span>💬</span> <span data-i18n="orderWa">Commander directement sur WhatsApp</span>
         </a>
         <button class="btn-modal-cart" id="modal-btn-cart">
-          <span>🛍</span> <span>Ajouter au Panier</span>
+          <span>🛍</span> <span data-i18n="addToCart">Ajouter au Panier</span>
         </button>
       </div>
     </div>
@@ -426,7 +426,7 @@
   <!-- TIROIR DU PANIER (CART DRAWER) -->
   <aside class="cart-drawer" id="cart-drawer" aria-label="Votre Sélection">
     <div class="cart-header">
-      <h2>Votre Sélection</h2>
+      <h2 data-i18n="yourCart">Votre Sélection</h2>
       <button class="modal-close-btn" id="cart-close-btn" style="position: static;" aria-label="Fermer le panier">✕</button>
     </div>
 
@@ -434,19 +434,19 @@
 
     <div id="cart-empty-state" style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
       <div style="font-size: 40px; color: var(--gold-primary); margin-bottom: 15px;">۞</div>
-      <p>Votre panier attend sa première pièce d'exception.</p>
+      <p data-i18n="emptyCart">Votre panier attend sa première pièce d'exception.</p>
     </div>
 
     <div class="cart-footer">
       <div class="cart-total-row">
-        <span>Sous-total</span>
+        <span data-i18n="subtotal">Sous-total</span>
         <span id="cart-total-price">0 DH</span>
       </div>
       <a class="btn-checkout-wa" id="btn-cart-checkout-wa" href="#" target="_blank" rel="noopener noreferrer">
-        <span>💬</span> <span>Confirmer par WhatsApp</span>
+        <span>💬</span> <span data-i18n="confirmWa">Confirmer par WhatsApp</span>
       </a>
       <button class="btn-checkout-supabase" id="btn-cart-continue" onclick="document.getElementById('cart-close-btn').click();">
-        Continuer mes découvertes
+        <span data-i18n="continueShopping">Continuer mes découvertes</span>
       </button>
     </div>
   </aside>
