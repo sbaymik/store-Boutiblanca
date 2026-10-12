@@ -598,7 +598,7 @@ function createWhatsAppOrderUrl(product) {
   } else {
     msg = `Bonjour BOUTIBLANCA,\nJe souhaite commander cette création d'exception :\n\n✨ *${name}*\n🏷️ Catégorie : ${category}\n💰 Prix : ${price}\n🆔 Réf : ${product.id}\n\nPouvez-vous me confirmer la disponibilité et le délai de livraison ? Merci.`;
   }
-  return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+  return `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`;
 }
 
 // RENDU CARTE UNIVERSEL BILINGUE (CARROUSEL & GRILLE)
@@ -863,7 +863,7 @@ function renderCart() {
     const msg = isAr 
       ? `السلام عليكم بوتي بلانكا، أود تأكيد طلبيتي:\n\n${lines}\n\n*المجموع:* ${formatPrice(total)}\n\nيرجى تأكيد التوصيل وبيانات الاستلام.`
       : `Bonjour BOUTIBLANCA, je souhaite valider ma commande avec vos créations :\n\n${lines}\n\n*Total :* ${formatPrice(total)}\n\nPouvez-vous me confirmer les modalités de livraison ? Merci.`;
-    btnWaAll.href = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+    btnWaAll.href = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`;
   }
 }
 
@@ -911,7 +911,7 @@ function setLanguage(lang) {
     const heroMsg = lang === "ar" 
       ? "السلام عليكم بوتي بلانكا، أود استشارة خاصة لاختيار قطعة مناسبة."
       : "Bonjour BOUTIBLANCA, je souhaite un conseil pour une création.";
-    heroWa.href = `https://wa.me/${phone}?text=${encodeURIComponent(heroMsg)}`;
+    heroWa.href = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(heroMsg)}`;
   }
 
   const floatingWa = $("#floating-wa-btn");
@@ -919,7 +919,7 @@ function setLanguage(lang) {
     const floatMsg = lang === "ar" 
       ? "السلام عليكم بوتي بلانكا، أود الاستفسار عن تفصيل أو اقتناء قطعة."
       : "Bonjour BOUTIBLANCA, je souhaite un conseil personnalisé sur vos créations.";
-    floatingWa.href = `https://wa.me/${phone}?text=${encodeURIComponent(floatMsg)}`;
+    floatingWa.href = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(floatMsg)}`;
   }
 
   initTopCarousel();
@@ -960,7 +960,7 @@ function applyNoCodeSettings() {
     const msg = state.language === "ar" 
       ? "السلام عليكم بوتي بلانكا، أود الاستفسار عن تفصيل أو اقتناء قطعة."
       : "Bonjour BOUTIBLANCA, je souhaite un conseil personnalisé sur vos créations.";
-    waFloating.href = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+    waFloating.href = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`;
   }
 }
 

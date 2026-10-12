@@ -1,5 +1,5 @@
 /* ==========================================================================
-   BOUTIBLANCA ADMIN — STUDIO NO-CODE & GESTION MAISON
+   BOUTIBLANCA ADMIN — PRODUCTION CSS (AUTHENTIFICATION & STUDIO NO-CODE)
    ========================================================================== */
 
 :root {
@@ -54,6 +54,64 @@ button {
   border: none;
 }
 
+/* FORCAGE VISIBILITE ATTRIBUT HIDDEN */
+[hidden],
+.is-hidden {
+  display: none !important;
+}
+
+.is-visible {
+  display: grid !important;
+}
+
+/* AUTHENTIFICATION SCREEN */
+.auth-wrap {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: linear-gradient(135deg, #1c1a17 0%, #100f0d 100%);
+}
+
+.auth-card {
+  background: #ffffff;
+  border: 1px solid var(--admin-line);
+  padding: clamp(32px, 5vw, 54px);
+  width: min(100%, 480px);
+  border-radius: var(--radius-md);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.auth-card .brand {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  letter-spacing: 0.16em;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.auth-card .brand span {
+  color: var(--admin-gold);
+}
+
+.auth-card h1 {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  margin: 10px 0 12px;
+}
+
+.muted {
+  color: var(--admin-muted);
+  line-height: 1.6;
+}
+
+.notice {
+  margin-top: 15px;
+  font-size: 12px;
+  color: #a43a2b;
+  min-height: 20px;
+}
+
 /* LAYOUT SHELL */
 .admin-shell {
   display: grid;
@@ -68,7 +126,7 @@ button {
   padding: 28px 18px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -76,7 +134,7 @@ button {
 }
 
 .brand-admin {
-  padding: 0 10px 24px;
+  padding: 0 10px 22px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   margin-bottom: 12px;
 }
@@ -107,19 +165,19 @@ button {
   color: var(--admin-gold);
   text-transform: uppercase;
   font-weight: 700;
-  padding: 10px 12px 4px;
+  padding: 8px 12px 2px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
+  padding: 11px 14px;
   border-radius: var(--radius-sm);
   color: #c4bbb0;
   font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   background: transparent;
   transition: all 0.2s;
   text-align: left;
@@ -182,6 +240,15 @@ button {
   font-weight: 600;
 }
 
+.user-pill {
+  font-size: 11px;
+  color: var(--admin-muted);
+  border: 1px solid var(--admin-line);
+  padding: 8px 14px;
+  border-radius: 30px;
+  background: #fff;
+}
+
 .badge-nocode {
   display: inline-flex;
   align-items: center;
@@ -197,7 +264,41 @@ button {
   letter-spacing: 0.08em;
 }
 
-/* PANELS & CARDS */
+/* PANELS & METRICS */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.metric {
+  background: var(--admin-card);
+  border: 1px solid var(--admin-line);
+  border-radius: var(--radius-md);
+  padding: 22px;
+}
+
+.metric span {
+  display: block;
+  font-size: 11px;
+  color: var(--admin-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.metric strong {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 36px;
+  margin: 8px 0;
+}
+
+.metric small {
+  font-size: 11px;
+  color: var(--admin-muted);
+}
+
 .panel {
   background: var(--admin-card);
   border-radius: var(--radius-md);
@@ -222,12 +323,11 @@ button {
   font-weight: 600;
 }
 
-/* PALETTES DE COULEURS EN 1 CLIC */
+/* PALETTES DE COULEURS */
 .presets-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
-  margin-bottom: 28px;
 }
 
 .preset-card {
@@ -270,7 +370,7 @@ button {
   color: var(--admin-muted);
 }
 
-/* COLOR PICKERS & FORM GRID */
+/* FORMULAIRES & COLOR PICKERS */
 .form-grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -293,7 +393,6 @@ button {
   font-size: 12px;
   font-weight: 700;
   color: var(--admin-text);
-  letter-spacing: 0.02em;
 }
 
 .color-input-wrapper {
@@ -323,7 +422,7 @@ button {
   font-weight: 600;
 }
 
-/* SÉLECTEUR VISUEL D'IMAGES (NO-CODE MEDIA PICKER) */
+/* SÉLECTEUR DE PHOTOS */
 .photo-presets-row {
   display: flex;
   gap: 12px;
@@ -348,11 +447,11 @@ button {
   transform: scale(1.05);
 }
 
-/* BOUTONS D'ACTION */
+/* BOUTONS */
 .btn-primary {
   background: var(--admin-gold);
   color: #12100e;
-  padding: 13px 26px;
+  padding: 12px 24px;
   border-radius: var(--radius-sm);
   font-weight: 700;
   font-size: 12px;
@@ -372,15 +471,16 @@ button {
 .btn-secondary {
   background: var(--admin-dark);
   color: #fff;
-  padding: 12px 22px;
+  padding: 11px 20px;
   border-radius: var(--radius-sm);
   font-weight: 600;
   font-size: 12px;
 }
 
-/* TABLEAU DES PRODUITS */
-.table-responsive {
+/* TABLEAU DES ARTICLES & COMMANDES */
+.table-wrap {
   overflow-x: auto;
+  padding: 0;
 }
 
 table {
@@ -415,12 +515,29 @@ th {
   border-radius: 4px;
 }
 
-/* LIVE PREVIEW FRAME */
+.status {
+  display: inline-block;
+  padding: 4px 9px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.status.published {
+  background: #e2ecdf;
+  color: #276224;
+}
+
+.status.draft {
+  background: #f2e7d4;
+  color: #875b23;
+}
+
+/* LIVE PREVIEW */
 .live-preview-wrap {
   border: 2px solid var(--admin-line);
   border-radius: var(--radius-md);
   overflow: hidden;
-  margin-top: 20px;
   background: #fff;
 }
 
@@ -465,9 +582,9 @@ th {
   opacity: 1;
 }
 
-.view-section {
+.view {
   display: none;
 }
-.view-section.active {
+.view.active {
   display: block;
 }

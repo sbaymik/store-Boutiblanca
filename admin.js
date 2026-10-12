@@ -70,35 +70,113 @@ function setView(name) {
   if (name === "preview") refreshPreviewFrame();
 }
 
+// GESTION AFFICHAGE AUTH / ADMIN AVEC SECURITE CSS RENFORCEE
+function showAuthScreen(msgHtml = "", isError = false) {
+  const auth = $("#auth-screen");
+  const app = $("#admin-app");
+  if (auth) {
+    auth.hidden = false;
+    auth.style.display = "grid";
+    auth.classList.remove("is-hidden");
+  }
+  if (app) {
+    app.hidden = true;
+    app.style.display = "none";
+    app.classList.remove("is-visible");
+  }
+  const el = $("#auth-message");
+  if (el) {
+    el.innerHTML = msgHtml;
+    el.style.color = isError ? "#a43a2b" : "var(--admin-gold)";
+  }
+}
+
+function showAdminApp(displayName = "Administrateur") {
+  const auth = $("#auth-screen");
+  const app = $("#admin-app");
+  if (auth) {
+    auth.hidden = true;
+    auth.style.display = "none";
+    auth.classList.add("is-hidden");
+  }
+  if (app) {
+    app.hidden = false;
+    app.style.display = "grid";
+    app.classList.add("is-visible");
+  }
+  const emailEl = $("#admin-email");
+  if (emailEl) emailEl.textContent = displayName;
+}
+
 // AUTHENTIFICATION SUPABASE ADMIN OBLIGATOIRE
 async function ensureAdmin(session) {
   currentUser = session?.user || null;
   if (!currentUser) {
-    $("#auth-screen").hidden = false;
-    $("#admin-app").hidden = true;
+    showAuthScreen();
     return false;
   }
 
   try {
-    const { data, error } = await client.from("admin_profiles").select("role,display_name").eq("id", currentUser.id).maybeSingle();
-    if (error) throw error;
-    if (!data || data.role !== "admin") {
-      await client.auth.signOut();
-      $("#auth-message").textContent = "Ce compte n'a pas le rôle administrateur dans admin_profiles.";
-      $("#auth-screen").hidden = false;
-      $("#admin-app").hidden = true;
+    const { data, error } = await client
+      .from("admin_profiles")
+      .select("role,display_name")
+      .eq("id", currentUser.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Erreur vérification admin_profiles:", error);
+      showAuthScreen(`Erreur Supabase: ${escapeHtml(error.message)}.<br><small>Assurez-vous que le script <code>supabase/schema.sql</code> a bien été exécuté dans Supabase.</small>`, true);
       return false;
     }
-    $("#auth-screen").hidden = true;
-    $("#admin-app").hidden = false;
-    $("#admin-email").textContent = data.display_name || currentUser.email || "Administrateur";
+
+    if (!data || data.role !== "admin") {
+      const uid = currentUser.id;
+      const sqlHelp = `INSERT INTO public.admin_profiles (id, role, display_name)\nVALUES ('${uid}', 'admin', 'Admin BOUTIBLANCA')\nON CONFLICT (id) DO UPDATE SET role = 'admin';`;
+      showAuthScreen(`
+        <div style="text-align: left; background: #fff8f5; border: 1px solid #e8c5b5; border-radius: 8px; padding: 14px; margin-top: 14px; color: #842e20; line-height: 1.5;">
+          <strong style="font-size: 13px;">Compte connecté (${escapeHtml(currentUser.email)}) : Rôle admin à activer</strong>
+          <p style="margin: 8px 0 6px; font-size: 12px; color: #555;">Votre compte existe bien dans Supabase Auth, mais il doit être enregistré avec le rôle <code>admin</code> dans la table <code>admin_profiles</code>.</p>
+          <p style="font-size: 12px; font-weight: 600; margin-bottom: 4px;">Exécutez cette commande dans le <strong>SQL Editor</strong> de Supabase :</p>
+          <pre style="background: #1e1b18; color: #e8d0a9; padding: 10px; border-radius: 6px; font-size: 11px; overflow-x: auto; font-family: monospace; user-select: all; margin: 4px 0 10px;">${escapeHtml(sqlHelp)}</pre>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" id="btn-copy-admin-sql" style="padding: 7px 12px; font-size: 11px; background: #842e20; color: #fff; border-radius: 4px; font-weight: 600;">📋 Copier la commande SQL</button>
+            <button type="button" id="btn-retry-admin" style="padding: 7px 12px; font-size: 11px; background: var(--admin-gold); color: #fff; border-radius: 4px; font-weight: 600;">🔄 Actualiser mes droits</button>
+            <button type="button" id="btn-logout-temp" style="padding: 7px 12px; font-size: 11px; background: #ccc; color: #222; border-radius: 4px;">Déconnexion</button>
+          </div>
+        </div>
+      `, true);
+
+      const copyBtn = document.getElementById("btn-copy-admin-sql");
+      if (copyBtn) {
+        copyBtn.onclick = () => {
+          navigator.clipboard.writeText(sqlHelp);
+          copyBtn.textContent = "✓ Commande copiée !";
+        };
+      }
+      const retryBtn = document.getElementById("btn-retry-admin");
+      if (retryBtn) {
+        retryBtn.onclick = async () => {
+          retryBtn.textContent = "Vérification...";
+          const { data: refreshedSession } = await client.auth.getSession();
+          await ensureAdmin(refreshedSession?.session || session);
+        };
+      }
+      const logoutBtn = document.getElementById("btn-logout-temp");
+      if (logoutBtn) {
+        logoutBtn.onclick = async () => {
+          await client.auth.signOut();
+          showAuthScreen("Déconnecté.", false);
+        };
+      }
+      return false;
+    }
+
+    showAdminApp(data.display_name || currentUser.email || "Administrateur");
     await refreshOverview();
     return true;
   } catch (err) {
     console.error(err);
-    $("#auth-message").textContent = err.message || "Erreur de vérification des droits.";
-    $("#auth-screen").hidden = false;
-    $("#admin-app").hidden = true;
+    showAuthScreen("Erreur : " + (err.message || "Impossible de vérifier les droits admin."), true);
     return false;
   }
 }
@@ -306,7 +384,7 @@ async function loadOrders() {
       <tr>
         <td><strong>${escapeHtml(o.order_number || o.id.slice(0, 8))}</strong></td>
         <td>${escapeHtml(o.customer_name)}</td>
-        <td><a href="https://wa.me/${escapeHtml(o.customer_phone).replace(/\D/g, '')}" target="_blank" style="color:#25d366; font-weight:700;">💬 ${escapeHtml(o.customer_phone)}</a></td>
+        <td><a href="https://api.whatsapp.com/send?phone=${escapeHtml(o.customer_phone).replace(/\D/g, '')}" target="_blank" style="color:#25d366; font-weight:700;">💬 ${escapeHtml(o.customer_phone)}</a></td>
         <td><strong>${Number(o.total_mad).toLocaleString("fr-MA")} DH</strong></td>
         <td>
           <select data-order-status="${o.id}" style="padding:5px 8px; font-size:11px;">
@@ -453,24 +531,55 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   $("#login-form").onsubmit = async (e) => {
     e.preventDefault();
+    const btn = $("#login-form button[type='submit']");
+    const originalText = btn ? btn.textContent : "Se Connecter à l'Espace Admin";
+
     if (!ready) {
-      $("#auth-message").textContent = "Configurez SUPABASE_URL et SUPABASE_ANON_KEY dans supabase-config.js.";
+      showAuthScreen("Configurez SUPABASE_URL et SUPABASE_ANON_KEY dans supabase-config.js.", true);
       return;
     }
-    $("#auth-message").textContent = "Connexion en cours…";
-    const { data, error } = await client.auth.signInWithPassword({
-      email: $("#email").value.trim(),
-      password: $("#password").value
-    });
-    if (error) {
-      $("#auth-message").textContent = error.message;
-      return;
+
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Vérification en cours…";
     }
-    await ensureAdmin(data.session);
+    showAuthScreen("<span style='color:var(--admin-gold);'>Connexion à Supabase en cours…</span>", false);
+
+    try {
+      const email = $("#email").value.trim();
+      const password = $("#password").value;
+      const { data, error } = await client.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+      if (error) {
+        showAuthScreen("Identifiants incorrects : " + escapeHtml(error.message), true);
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+        return;
+      }
+
+      const ok = await ensureAdmin(data.session);
+      if (!ok && btn) {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    } catch (err) {
+      console.error(err);
+      showAuthScreen("Erreur de connexion : " + escapeHtml(err.message || "Vérifiez votre connexion."), true);
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
   };
 
   $("#logout-button").onclick = async () => {
     if (client) await client.auth.signOut();
+    showAuthScreen("Vous avez été déconnecté.", false);
     location.reload();
   };
 
@@ -487,18 +596,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Vérification de la session active
   if (client) {
-    const { data: { session } } = await client.auth.getSession();
-    if (session) {
-      await ensureAdmin(session);
-    } else {
-      $("#auth-screen").hidden = false;
-      $("#admin-app").hidden = true;
+    try {
+      const { data: { session } } = await client.auth.getSession();
+      if (session) {
+        await ensureAdmin(session);
+      } else {
+        showAuthScreen();
+      }
+    } catch (err) {
+      console.error(err);
+      showAuthScreen();
     }
+
     client.auth.onAuthStateChange((_evt, sess) => {
       if (!sess) {
-        $("#auth-screen").hidden = false;
-        $("#admin-app").hidden = true;
+        showAuthScreen();
       }
     });
+  } else {
+    showAuthScreen("Configuration Supabase manquante dans supabase-config.js", true);
   }
 });

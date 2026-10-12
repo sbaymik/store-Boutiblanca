@@ -54,6 +54,16 @@ button {
   border: none;
 }
 
+/* FORCAGE VISIBILITE ATTRIBUT HIDDEN */
+[hidden],
+.is-hidden {
+  display: none !important;
+}
+
+.is-visible {
+  display: grid !important;
+}
+
 /* AUTHENTIFICATION SCREEN */
 .auth-wrap {
   min-height: 100vh;

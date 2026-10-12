@@ -1,87 +1,424 @@
-// ==========================================================================
-// BOUTIBLANCA ADMIN — STUDIO NO-CODE JS
-// Gestion des Thèmes, Photos, Pages, WhatsApp & Catalogue
-// ==========================================================================
+/* ==========================================================================
+   BOUTIBLANCA ADMIN — PRODUCTION LOGIC
+   Supabase Auth & RLS Tables + Studio No-Code (Thème, Photos, Pages)
+   ========================================================================== */
+
+const CFG = window.BOUTIBLANCA_CONFIG || {};
+const ready = Boolean(window.supabase && CFG.SUPABASE_URL && CFG.SUPABASE_ANON_KEY && !CFG.SUPABASE_URL.includes("TON-PROJET") && !CFG.SUPABASE_ANON_KEY.includes("COLLE_ICI"));
+const client = ready ? window.supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY) : null;
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 
+let products = [], pages = [], orders = [], currentUser = null;
+
 const PRESET_PALETTES = {
-  gold: {
-    goldPrimary: "#c5a059",
-    bgCanvas: "#faf7f2",
-    textMain: "#1d1a16",
-    accentColor: "#1b3b2e",
-    fontSerif: '"Playfair Display", "Cinzel", Georgia, serif'
-  },
-  ebony: {
-    goldPrimary: "#dfba73",
-    bgCanvas: "#12100e",
-    textMain: "#faf7f2",
-    accentColor: "#9a742f",
-    fontSerif: '"Cinzel", "Playfair Display", serif'
-  },
-  emerald: {
-    goldPrimary: "#c5a059",
-    bgCanvas: "#f4f7f5",
-    textMain: "#161412",
-    accentColor: "#18382b",
-    fontSerif: '"Playfair Display", "Cinzel", Georgia, serif'
-  },
-  majorelle: {
-    goldPrimary: "#e0b464",
-    bgCanvas: "#f6f8fb",
-    textMain: "#101524",
-    accentColor: "#172d54",
-    fontSerif: '"Playfair Display", "Cinzel", Georgia, serif'
-  },
-  terracotta: {
-    goldPrimary: "#c5a059",
-    bgCanvas: "#fbf8f5",
-    textMain: "#1c1512",
-    accentColor: "#a44c34",
-    fontSerif: '"Playfair Display", "Cinzel", Georgia, serif'
-  }
+  gold: { goldPrimary: "#c5a059", bgCanvas: "#faf7f2", textMain: "#1d1a16", accentColor: "#1b3b2e", fontSerif: '"Playfair Display", "Cinzel", Georgia, serif' },
+  ebony: { goldPrimary: "#dfba73", bgCanvas: "#12100e", textMain: "#faf7f2", accentColor: "#9a742f", fontSerif: '"Cinzel", "Playfair Display", serif' },
+  emerald: { goldPrimary: "#c5a059", bgCanvas: "#f4f7f5", textMain: "#161412", accentColor: "#18382b", fontSerif: '"Playfair Display", "Cinzel", Georgia, serif' },
+  majorelle: { goldPrimary: "#e0b464", bgCanvas: "#f6f8fb", textMain: "#101524", accentColor: "#172d54", fontSerif: '"Playfair Display", "Cinzel", Georgia, serif' },
+  terracotta: { goldPrimary: "#c5a059", bgCanvas: "#fbf8f5", textMain: "#1c1512", accentColor: "#a44c34", fontSerif: '"Playfair Display", "Cinzel", Georgia, serif' }
 };
 
 function showToast(msg = "Modifications enregistrées avec succès !") {
   const toast = $("#admin-toast");
+  if (!toast) return;
   toast.textContent = msg;
   toast.classList.add("show");
   setTimeout(() => toast.classList.remove("show"), 2800);
 }
 
-// GESTION DES ONGLETS
-function initTabs() {
-  $$(".nav-item").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const tab = btn.dataset.tab;
-      $$(".nav-item").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
+const message = (text, error = false) => {
+  const el = $("#global-message");
+  if (!el) return;
+  el.textContent = text;
+  el.style.color = error ? "#9a4b32" : "#32633d";
+};
 
-      $$(".view-section").forEach(sec => sec.classList.remove("active"));
-      const targetSec = $(`#view-${tab}`);
-      if (targetSec) targetSec.classList.add("active");
+const fail = (error) => {
+  console.error(error);
+  message(error?.message || "Une erreur est survenue.", true);
+};
 
-      const titles = {
-        theme: "Studio Thème & Couleurs",
-        content: "Contenus & Photos Storefront",
-        pages: "Éditeur de Pages No-Code",
-        products: "Catalogue des 20 Articles",
-        orders: "Commandes Clients",
-        preview: "Aperçu Boutique en Direct"
-      };
-      $("#topbar-title").textContent = titles[tab] || "Administration";
-
-      if (tab === "preview") refreshPreviewFrame();
-    });
-  });
+function safeSlug(value) {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 150);
 }
 
-// CHARGEMENT ET SAUVEGARDE DU THÈME NO-CODE
+function escapeHtml(s = "") {
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+// BASCULE DE VUES
+function setView(name) {
+  $$(".view").forEach(v => v.classList.toggle("active", v.id === "view-" + name));
+  $$(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.view === name));
+  
+  const titles = {
+    overview: "Vue d'ensemble",
+    theme: "Studio Thème & Couleurs",
+    content: "Photos & Contenus Hero",
+    pages: "Landing Pages No-Code",
+    products: "Catalogue Produits",
+    orders: "Commandes Clients",
+    preview: "Aperçu en Direct"
+  };
+  $("#view-title").textContent = titles[name] || name;
+
+  if (name === "products") loadProducts();
+  if (name === "pages") loadPages();
+  if (name === "orders") loadOrders();
+  if (name === "preview") refreshPreviewFrame();
+}
+
+// GESTION AFFICHAGE AUTH / ADMIN AVEC SECURITE CSS RENFORCEE
+function showAuthScreen(msgHtml = "", isError = false) {
+  const auth = $("#auth-screen");
+  const app = $("#admin-app");
+  if (auth) {
+    auth.hidden = false;
+    auth.style.display = "grid";
+    auth.classList.remove("is-hidden");
+  }
+  if (app) {
+    app.hidden = true;
+    app.style.display = "none";
+    app.classList.remove("is-visible");
+  }
+  const el = $("#auth-message");
+  if (el) {
+    el.innerHTML = msgHtml;
+    el.style.color = isError ? "#a43a2b" : "var(--admin-gold)";
+  }
+}
+
+function showAdminApp(displayName = "Administrateur") {
+  const auth = $("#auth-screen");
+  const app = $("#admin-app");
+  if (auth) {
+    auth.hidden = true;
+    auth.style.display = "none";
+    auth.classList.add("is-hidden");
+  }
+  if (app) {
+    app.hidden = false;
+    app.style.display = "grid";
+    app.classList.add("is-visible");
+  }
+  const emailEl = $("#admin-email");
+  if (emailEl) emailEl.textContent = displayName;
+}
+
+// AUTHENTIFICATION SUPABASE ADMIN OBLIGATOIRE
+async function ensureAdmin(session) {
+  currentUser = session?.user || null;
+  if (!currentUser) {
+    showAuthScreen();
+    return false;
+  }
+
+  try {
+    const { data, error } = await client
+      .from("admin_profiles")
+      .select("role,display_name")
+      .eq("id", currentUser.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Erreur vérification admin_profiles:", error);
+      showAuthScreen(`Erreur Supabase: ${escapeHtml(error.message)}.<br><small>Assurez-vous que le script <code>supabase/schema.sql</code> a bien été exécuté dans Supabase.</small>`, true);
+      return false;
+    }
+
+    if (!data || data.role !== "admin") {
+      const uid = currentUser.id;
+      const sqlHelp = `INSERT INTO public.admin_profiles (id, role, display_name)\nVALUES ('${uid}', 'admin', 'Admin BOUTIBLANCA')\nON CONFLICT (id) DO UPDATE SET role = 'admin';`;
+      showAuthScreen(`
+        <div style="text-align: left; background: #fff8f5; border: 1px solid #e8c5b5; border-radius: 8px; padding: 14px; margin-top: 14px; color: #842e20; line-height: 1.5;">
+          <strong style="font-size: 13px;">Compte connecté (${escapeHtml(currentUser.email)}) : Rôle admin à activer</strong>
+          <p style="margin: 8px 0 6px; font-size: 12px; color: #555;">Votre compte existe bien dans Supabase Auth, mais il doit être enregistré avec le rôle <code>admin</code> dans la table <code>admin_profiles</code>.</p>
+          <p style="font-size: 12px; font-weight: 600; margin-bottom: 4px;">Exécutez cette commande dans le <strong>SQL Editor</strong> de Supabase :</p>
+          <pre style="background: #1e1b18; color: #e8d0a9; padding: 10px; border-radius: 6px; font-size: 11px; overflow-x: auto; font-family: monospace; user-select: all; margin: 4px 0 10px;">${escapeHtml(sqlHelp)}</pre>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" id="btn-copy-admin-sql" style="padding: 7px 12px; font-size: 11px; background: #842e20; color: #fff; border-radius: 4px; font-weight: 600;">📋 Copier la commande SQL</button>
+            <button type="button" id="btn-retry-admin" style="padding: 7px 12px; font-size: 11px; background: var(--admin-gold); color: #fff; border-radius: 4px; font-weight: 600;">🔄 Actualiser mes droits</button>
+            <button type="button" id="btn-logout-temp" style="padding: 7px 12px; font-size: 11px; background: #ccc; color: #222; border-radius: 4px;">Déconnexion</button>
+          </div>
+        </div>
+      `, true);
+
+      const copyBtn = document.getElementById("btn-copy-admin-sql");
+      if (copyBtn) {
+        copyBtn.onclick = () => {
+          navigator.clipboard.writeText(sqlHelp);
+          copyBtn.textContent = "✓ Commande copiée !";
+        };
+      }
+      const retryBtn = document.getElementById("btn-retry-admin");
+      if (retryBtn) {
+        retryBtn.onclick = async () => {
+          retryBtn.textContent = "Vérification...";
+          const { data: refreshedSession } = await client.auth.getSession();
+          await ensureAdmin(refreshedSession?.session || session);
+        };
+      }
+      const logoutBtn = document.getElementById("btn-logout-temp");
+      if (logoutBtn) {
+        logoutBtn.onclick = async () => {
+          await client.auth.signOut();
+          showAuthScreen("Déconnecté.", false);
+        };
+      }
+      return false;
+    }
+
+    showAdminApp(data.display_name || currentUser.email || "Administrateur");
+    await refreshOverview();
+    return true;
+  } catch (err) {
+    console.error(err);
+    showAuthScreen("Erreur : " + (err.message || "Impossible de vérifier les droits admin."), true);
+    return false;
+  }
+}
+
+// RAFRAÎCHISSEMENT DES STATS D'ACCUEIL
+async function refreshOverview() {
+  if (!client) return;
+  try {
+    const [p, l, o] = await Promise.all([
+      client.from("products").select("id", { count: "exact", head: true }),
+      client.from("landing_pages").select("id", { count: "exact", head: true }).eq("is_published", true),
+      client.from("orders").select("id", { count: "exact", head: true })
+    ]);
+    $("#metric-products").textContent = p.count ?? 0;
+    $("#metric-pages").textContent = l.count ?? 0;
+    $("#metric-orders").textContent = o.count ?? 0;
+  } catch (e) {
+    fail(e);
+  }
+}
+
+// GESTION DU CATALOGUE PRODUITS
+async function loadProducts() {
+  if (!client) return;
+  try {
+    const { data, error } = await client.from("products").select("*").order("updated_at", { ascending: false });
+    if (error) return fail(error);
+    products = data || [];
+    const tbody = $("#products-table");
+    if (!products.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="padding:20px; text-align:center; color:var(--admin-muted);">Aucun produit en base. Cliquez sur « Nouveau Produit » pour en ajouter.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = products.map(p => `
+      <tr>
+        <td>
+          <div class="td-product-info">
+            <img class="td-img" src="${escapeHtml(p.image_url || 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=200')}" alt="${escapeHtml(p.name_fr)}" />
+            <div>
+              <strong>${escapeHtml(p.name_fr)}</strong><br>
+              <small style="color:var(--admin-muted);">${escapeHtml(p.slug)}</small>
+            </div>
+          </div>
+        </td>
+        <td>${escapeHtml(p.category)}</td>
+        <td><strong>${Number(p.price_mad).toLocaleString("fr-MA")} DH</strong></td>
+        <td>${p.stock}</td>
+        <td><span class="status ${p.is_published ? 'published' : 'draft'}">${p.is_published ? 'En ligne' : 'Brouillon'}</span></td>
+        <td>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-secondary" style="padding:6px 12px; font-size:11px;" data-edit-product="${p.id}">Modifier</button>
+            <button class="btn-secondary" style="padding:6px 12px; font-size:11px; background:#8a3224;" data-delete-product="${p.id}">Supprimer</button>
+          </div>
+        </td>
+      </tr>
+    `).join("");
+
+    tbody.querySelectorAll("[data-edit-product]").forEach(b => b.onclick = () => editProduct(b.dataset.editProduct));
+    tbody.querySelectorAll("[data-delete-product]").forEach(b => b.onclick = () => deleteProduct(b.dataset.deleteProduct));
+  } catch (e) {
+    fail(e);
+  }
+}
+
+function showProductForm(p = null) {
+  $("#product-form").hidden = false;
+  $("#product-form-title").textContent = p ? "Modifier le produit" : "Nouveau produit";
+  $("#product-id").value = p?.id || "";
+  $("#product-name").value = p?.name_fr || "";
+  $("#product-name-ar").value = p?.name_ar || "";
+  $("#product-slug").value = p?.slug || "";
+  $("#product-category").value = p?.category || "Caftan";
+  $("#product-price").value = p?.price_mad ?? "";
+  $("#product-stock").value = p?.stock ?? 1;
+  $("#product-image").value = p?.image_url || "";
+  $("#product-badge").value = p?.badge || "";
+  $("#product-description").value = p?.description_fr || "";
+  $("#product-description-ar").value = p?.description_ar || "";
+  $("#product-published").checked = p?.is_published ?? true;
+  $("#product-form").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function editProduct(id) {
+  showProductForm(products.find(p => p.id === id));
+}
+
+function hideProductForm() {
+  $("#product-form").hidden = true;
+  $("#product-form").reset();
+  $("#product-id").value = "";
+}
+
+async function deleteProduct(id) {
+  const p = products.find(x => x.id === id);
+  if (!p || !confirm(`Supprimer définitivement « ${p.name_fr} » ?`)) return;
+  const { error } = await client.from("products").delete().eq("id", id);
+  if (error) return fail(error);
+  showToast("Produit supprimé.");
+  await loadProducts();
+  await refreshOverview();
+}
+
+async function saveProduct(event) {
+  event.preventDefault();
+  const id = $("#product-id").value;
+  const name = $("#product-name").value.trim();
+  const record = {
+    name_fr: name,
+    name_ar: $("#product-name-ar").value.trim(),
+    slug: safeSlug($("#product-slug").value || name),
+    category: $("#product-category").value,
+    price_mad: Number($("#product-price").value),
+    stock: Number($("#product-stock").value),
+    image_url: $("#product-image").value.trim() || null,
+    badge: $("#product-badge").value.trim(),
+    description_fr: $("#product-description").value.trim(),
+    description_ar: $("#product-description-ar").value.trim(),
+    is_published: $("#product-published").checked
+  };
+
+  const result = id
+    ? await client.from("products").update(record).eq("id", id)
+    : await client.from("products").insert(record);
+
+  if (result.error) return fail(result.error);
+  showToast("Produit enregistré avec succès.");
+  hideProductForm();
+  await loadProducts();
+  await refreshOverview();
+}
+
+// GESTION DES LANDING PAGES NO-CODE
+async function loadPages() {
+  const list = $("#pages-list");
+  if (!list) return;
+
+  // Depuis Supabase
+  let loadedPages = [];
+  if (client) {
+    try {
+      const { data } = await client.from("landing_pages").select("*").order("updated_at", { ascending: false });
+      if (data) loadedPages = data;
+    } catch {}
+  }
+
+  // Fusion avec pages No-Code locales
+  const localPages = JSON.parse(localStorage.getItem("boutiblanca_nocode_pages") || "[]");
+  const allPages = [...localPages, ...loadedPages];
+
+  if (!allPages.length) {
+    list.innerHTML = '<p style="grid-column:1/-1; color:var(--admin-muted); font-size:12px;">Aucune page créée pour l\'instant.</p>';
+    return;
+  }
+
+  list.innerHTML = allPages.map(p => `
+    <article style="background:#fff; border:1px solid var(--admin-line); border-radius:var(--radius-sm); padding:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:8px;">
+        <h4 style="font-size:15px; font-weight:700;">${escapeHtml(p.title)}</h4>
+        <span class="status published">En ligne</span>
+      </div>
+      <p style="font-size:11px; color:var(--admin-muted); margin-bottom:12px;">URL : /${escapeHtml(p.slug)}</p>
+      <div style="display:flex; gap:8px;">
+        <a class="btn-secondary" style="padding:6px 12px; font-size:11px;" href="./index.html#collection" target="_blank">Aperçu ↗</a>
+      </div>
+    </article>
+  `).join("");
+}
+
+function initPagesStudio() {
+  const form = $("#nocode-page-builder-form");
+  if (form) {
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const title = $("#builder-page-title").value.trim();
+      const slug = safeSlug($("#builder-page-slug").value || title);
+      const cover = $("#builder-page-cover").value.trim();
+      const category = $("#builder-page-category").value;
+      const message = $("#builder-page-message").value.trim();
+
+      const newPage = { id: "page-" + Date.now(), title, slug, cover, category, message, createdAt: new Date().toLocaleDateString("fr-MA") };
+      const localPages = JSON.parse(localStorage.getItem("boutiblanca_nocode_pages") || "[]");
+      localPages.push(newPage);
+      localStorage.setItem("boutiblanca_nocode_pages", JSON.stringify(localPages));
+
+      form.reset();
+      loadPages();
+      showToast(`Landing page « ${title} » créée avec succès !`);
+    };
+  }
+}
+
+// GESTION DES COMMANDES SUPABASE
+async function loadOrders() {
+  if (!client) return;
+  try {
+    const { data, error } = await client.from("orders").select("*").order("created_at", { ascending: false }).limit(100);
+    if (error) return fail(error);
+    orders = data || [];
+    const tbody = $("#orders-table");
+    if (!orders.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="padding:20px; text-align:center; color:var(--admin-muted);">Aucune commande en attente.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = orders.map(o => `
+      <tr>
+        <td><strong>${escapeHtml(o.order_number || o.id.slice(0, 8))}</strong></td>
+        <td>${escapeHtml(o.customer_name)}</td>
+        <td><a href="https://api.whatsapp.com/send?phone=${escapeHtml(o.customer_phone).replace(/\D/g, '')}" target="_blank" style="color:#25d366; font-weight:700;">💬 ${escapeHtml(o.customer_phone)}</a></td>
+        <td><strong>${Number(o.total_mad).toLocaleString("fr-MA")} DH</strong></td>
+        <td>
+          <select data-order-status="${o.id}" style="padding:5px 8px; font-size:11px;">
+            <option ${o.status === "pending" ? "selected" : ""} value="pending">À confirmer</option>
+            <option ${o.status === "confirmed" ? "selected" : ""} value="confirmed">Confirmée</option>
+            <option ${o.status === "preparing" ? "selected" : ""} value="preparing">En préparation</option>
+            <option ${o.status === "shipped" ? "selected" : ""} value="shipped">Expédiée</option>
+            <option ${o.status === "delivered" ? "selected" : ""} value="delivered">Livrée</option>
+            <option ${o.status === "cancelled" ? "selected" : ""} value="cancelled">Annulée</option>
+          </select>
+        </td>
+        <td>${new Date(o.created_at).toLocaleDateString("fr-MA")}</td>
+        <td><button class="btn-secondary" style="padding:5px 10px; font-size:10px;" data-view-order="${o.id}">Détails</button></td>
+      </tr>
+    `).join("");
+
+    tbody.querySelectorAll("[data-order-status]").forEach(s => s.onchange = async () => {
+      const { error } = await client.from("orders").update({ status: s.value }).eq("id", s.dataset.orderStatus);
+      if (error) fail(error);
+      else showToast("Statut mis à jour.");
+    });
+
+    tbody.querySelectorAll("[data-view-order]").forEach(b => b.onclick = () => {
+      const o = orders.find(x => x.id === b.dataset.viewOrder);
+      alert(`Client : ${o.customer_name}\nTéléphone : ${o.customer_phone}\nVille : ${o.city || "Maroc"}\nAdresse : ${o.shipping_address}\nArticles : ${JSON.stringify(o.items, null, 2)}`);
+    });
+  } catch (e) {
+    fail(e);
+  }
+}
+
+// STUDIO THÈME NO-CODE
 function initThemeStudio() {
   const savedTheme = JSON.parse(localStorage.getItem("boutiblanca_theme_settings") || "null") || PRESET_PALETTES.gold;
-
   $("#picker-gold").value = savedTheme.goldPrimary;
   $("#hex-gold").value = savedTheme.goldPrimary;
   $("#picker-bg").value = savedTheme.bgCanvas;
@@ -92,33 +429,21 @@ function initThemeStudio() {
   $("#hex-accent").value = savedTheme.accentColor;
   $("#select-font").value = savedTheme.fontSerif;
 
-  // Lier color picker avec champ texte
-  function bindPicker(pickerId, hexId) {
-    $(`#${pickerId}`).addEventListener("input", (e) => {
-      $(`#${hexId}`).value = e.target.value;
-      saveTheme();
-    });
-    $(`#${hexId}`).addEventListener("change", (e) => {
-      $(`#${pickerId}`).value = e.target.value;
-      saveTheme();
-    });
+  function bindPicker(pId, hId) {
+    $(`#${pId}`).oninput = (e) => $(`#${hId}`).value = e.target.value;
+    $(`#${hId}`).onchange = (e) => $(`#${pId}`).value = e.target.value;
   }
-
   bindPicker("picker-gold", "hex-gold");
   bindPicker("picker-bg", "hex-bg");
   bindPicker("picker-text", "hex-text");
   bindPicker("picker-accent", "hex-accent");
 
-  $("#select-font").addEventListener("change", saveTheme);
-
-  // Clic sur une palette prédéfinie
   $$(".preset-card").forEach(card => {
-    card.addEventListener("click", () => {
+    card.onclick = () => {
       const p = PRESET_PALETTES[card.dataset.preset];
       if (!p) return;
       $$(".preset-card").forEach(c => c.classList.remove("active"));
       card.classList.add("active");
-
       $("#picker-gold").value = p.goldPrimary;
       $("#hex-gold").value = p.goldPrimary;
       $("#picker-bg").value = p.bgCanvas;
@@ -128,11 +453,15 @@ function initThemeStudio() {
       $("#picker-accent").value = p.accentColor;
       $("#hex-accent").value = p.accentColor;
       $("#select-font").value = p.fontSerif;
-
       saveTheme();
       showToast(`Palette « ${card.querySelector(".preset-name").textContent} » appliquée !`);
-    });
+    };
   });
+
+  $("#btn-save-theme").onclick = () => {
+    saveTheme();
+    showToast("Thème enregistré et appliqué à la boutique !");
+  };
 }
 
 function saveTheme() {
@@ -147,7 +476,7 @@ function saveTheme() {
   refreshPreviewFrame();
 }
 
-// CHARGEMENT ET SAUVEGARDE DES CONTENUS ET PHOTOS
+// STUDIO PHOTOS & CONTENUS NO-CODE
 function initContentStudio() {
   const savedContent = JSON.parse(localStorage.getItem("boutiblanca_content_settings") || "null");
   if (savedContent) {
@@ -158,22 +487,20 @@ function initContentStudio() {
     if (savedContent.heroImage) $("#hero-image-input").value = savedContent.heroImage;
   }
 
-  // Clic sur une photo prédéfinie
   $$(".photo-preset-thumb").forEach(thumb => {
-    thumb.addEventListener("click", () => {
+    thumb.onclick = () => {
       $$(".photo-preset-thumb").forEach(t => t.classList.remove("active"));
       thumb.classList.add("active");
       $("#hero-image-input").value = thumb.src;
       saveContent();
       showToast("Nouvelle photo Hero appliquée en 1 clic !");
-    });
+    };
   });
 
-  $("#hero-image-input").addEventListener("change", saveContent);
-  $("#announcement-input").addEventListener("change", saveContent);
-  $("#whatsapp-input").addEventListener("change", saveContent);
-  $("#hero-title-input").addEventListener("change", saveContent);
-  $("#hero-desc-input").addEventListener("change", saveContent);
+  $("#btn-save-content").onclick = () => {
+    saveContent();
+    showToast("Contenus enregistrés et synchronisés avec la boutique !");
+  };
 }
 
 function saveContent() {
@@ -188,156 +515,105 @@ function saveContent() {
   refreshPreviewFrame();
 }
 
-// ÉDITEUR DE PAGES NO-CODE
-function initPagesStudio() {
-  const form = $("#nocode-page-builder-form");
-  if (form) {
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const title = $("#builder-page-title").value.trim();
-      const slug = $("#builder-page-slug").value.trim();
-      const cover = $("#builder-page-cover").value.trim();
-      const category = $("#builder-page-category").value;
-      const message = $("#builder-page-message").value.trim();
-
-      const newPage = {
-        id: "page-" + Date.now(),
-        title,
-        slug,
-        cover,
-        category,
-        message,
-        createdAt: new Date().toLocaleDateString("fr-MA")
-      };
-
-      const pages = JSON.parse(localStorage.getItem("boutiblanca_nocode_pages") || "[]");
-      pages.push(newPage);
-      localStorage.setItem("boutiblanca_nocode_pages", JSON.stringify(pages));
-
-      form.reset();
-      renderPagesList();
-      showToast(`Landing page « ${title} » créée avec succès !`);
-    });
-  }
-
-  renderPagesList();
-}
-
-function renderPagesList() {
-  const container = $("#admin-pages-list");
-  if (!container) return;
-  const pages = JSON.parse(localStorage.getItem("boutiblanca_nocode_pages") || "[]");
-
-  if (pages.length === 0) {
-    container.innerHTML = `<p style="grid-column: 1 / -1; color: var(--admin-muted); font-size: 12px; padding: 15px 0;">Aucune page créée pour l'instant. Utilisez le formulaire ci-dessus pour lancer votre première landing page.</p>`;
-    return;
-  }
-
-  container.innerHTML = pages.map(p => `
-    <div style="border: 1px solid var(--admin-line); border-radius: var(--radius-sm); padding: 16px; background: #fff;">
-      <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 10px;">
-        <img src="${p.cover}" alt="${p.title}" style="width: 50px; height: 65px; object-fit: cover; border-radius: 4px;" />
-        <div>
-          <h4 style="font-size: 14px; margin-bottom: 3px;">${p.title}</h4>
-          <span style="font-size: 11px; color: var(--admin-muted);">URL : /${p.slug} · Filtre : ${p.category}</span>
-        </div>
-      </div>
-      <p style="font-size: 11px; color: var(--admin-muted); margin-bottom: 12px; line-height: 1.5;">${p.message || "Sélection spéciale"}</p>
-      <div style="display: flex; gap: 8px;">
-        <a class="btn-secondary" style="padding: 6px 12px; font-size: 11px;" href="./index.html#collection" target="_blank">Aperçu ↗</a>
-        <button class="btn-secondary" style="padding: 6px 12px; font-size: 11px; background: #8b3426;" onclick="deleteNocodePage('${p.id}')">Supprimer</button>
-      </div>
-    </div>
-  `).join("");
-}
-
-window.deleteNocodePage = function(id) {
-  let pages = JSON.parse(localStorage.getItem("boutiblanca_nocode_pages") || "[]");
-  pages = pages.filter(p => p.id !== id);
-  localStorage.setItem("boutiblanca_nocode_pages", JSON.stringify(pages));
-  renderPagesList();
-  showToast("Page supprimée.");
-};
-
-// CATALOGUE DES 20 PRODUITS
-function initProductsStudio() {
-  const tbody = $("#admin-products-table-body");
-  if (!tbody) return;
-
-  // Récupérer les 20 produits
-  const list = window.INITIAL_PRODUCTS_FOR_ADMIN || [
-    { id: "caftan-jawhara-royal", name: "Caftan Royal Jawhara", category: "Caftan", price: 3200, badge: "Broderie Skalli Or", image: "https://i.pinimg.com/originals/b0/82/9a/b0829aff252d5c80d5798fd5d9fae49a.jpg" },
-    { id: "caftan-mobra-emeraude", name: "Caftan Mobra Émeraude", category: "Caftan", price: 2850, badge: "Velours Royal", image: "https://i.pinimg.com/736x/1d/5a/f1/1d5af1b27361dacfc665bf12d078436f.jpg" },
-    { id: "caftan-bleu-majorelle", name: "Caftan Saphir Majorelle", category: "Caftan", price: 2600, badge: "Édition Prestige", image: "https://www.shutterstock.com/shutterstock/photos/2266636325/display_1500/stock-photo-caftan-marocain-caftan-arabe-culture-traditionnel-maroc-2266636325.jpg" },
-    { id: "caftan-nude-poudre", name: "Caftan Nude Perlé", category: "Caftan", price: 2950, badge: "Coup de Cœur", image: "https://nalou.fr/wp-content/uploads/2024/07/caftan-marocain-2.jpg" },
-    { id: "takchita-princesse-blanche", name: "Takchita Blanche & Or", category: "Takchita", price: 4600, badge: "Haute Couture", image: "https://i.pinimg.com/736x/93/f1/3d/93f13df4035c63fec4ba8f0a59644bc9.jpg" },
-    { id: "takchita-brocart-saphir", name: "Takchita Brocart Saphir", category: "Takchita", price: 3950, badge: "Pièce Unique", image: "https://s-media-cache-ak0.pinimg.com/736x/d6/9a/4b/d69a4bd68f9626b43c3dafdcc9f2cccf.jpg" },
-    { id: "takchita-rubis-imperial", name: "Takchita Rubis Impérial", category: "Takchita", price: 4200, badge: "Édition Limitée", image: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?auto=format&fit=crop&w=800&q=80" },
-    { id: "takchita-reine-saba", name: "Takchita Ivoire Céleste", category: "Takchita", price: 4800, badge: "Prestige Cérémonie", image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=800&q=80" },
-    { id: "jellaba-randa-amande", name: "Jellaba Randa Vert Amande", category: "Jellaba", price: 1250, badge: "Fait Main", image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=800&q=80" },
-    { id: "jellaba-sousdi-blanche", name: "Jellaba Sousdi Pure Blanche", category: "Jellaba", price: 980, badge: "Intemporel", image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=800&q=80" },
-    { id: "jellaba-velours-nocturne", name: "Jellaba Velours Nuit", category: "Jellaba", price: 1450, badge: "Hiver Élégant", image: "https://images.unsplash.com/photo-1549439602-43ebca2327af?auto=format&fit=crop&w=800&q=80" },
-    { id: "jellaba-lin-terracotta", name: "Jellaba Lin Terre de Sienne", category: "Jellaba", price: 890, badge: "Tendance 2026", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80" },
-    { id: "foulard-soie-zellige", name: "Foulard Soie Motif Zellige", category: "Foulard", price: 380, badge: "100% Soie Pure", image: "https://images.unsplash.com/photo-1601924994987-69e26d50dc26?auto=format&fit=crop&w=800&q=80" },
-    { id: "foulard-mousseline-dore", name: "Foulard Mousseline Liseré Doré", category: "Foulard", price: 290, badge: "Doux & Léger", image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80" },
-    { id: "foulard-medina-emeraude", name: "Foulard Médina Satin Émeraude", category: "Foulard", price: 350, badge: "Reflets Satinés", image: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=800&q=80" },
-    { id: "foulard-ceremonie-ivoire", name: "Foulard Cérémonie Ivoire & Perles", category: "Foulard", price: 420, badge: "Finition Perles", image: "https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?auto=format&fit=crop&w=800&q=80" },
-    { id: "chale-cachemire-tarz", name: "Châle Cachemire Tarz Fassi", category: "Châle", price: 650, badge: "Broderie Artisanale", image: "https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?auto=format&fit=crop&w=800&q=80" },
-    { id: "chale-pashmina-dore", name: "Châle Pashmina Moucharabieh", category: "Châle", price: 520, badge: "Chaleur & Prestige", image: "https://images.unsplash.com/photo-1607344645866-009c320c5ab8?auto=format&fit=crop&w=800&q=80" },
-    { id: "selham-royal-laine", name: "Selham Royal Laine Blanche", category: "Châle", price: 1850, badge: "Apparat Traditionnel", image: "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80" },
-    { id: "gandora-soie-aqqad", name: "Gandora Chic Soie & Aqqad", category: "Châle", price: 790, badge: "Confort Royal", image: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=800&q=80" }
-  ];
-
-  tbody.innerHTML = list.map(item => `
-    <tr>
-      <td>
-        <div class="td-product-info">
-          <img class="td-img" src="${item.image}" alt="${item.name}" />
-          <div>
-            <strong>${item.name}</strong>
-            <div style="font-size: 11px; color: var(--admin-muted);">${item.id}</div>
-          </div>
-        </div>
-      </td>
-      <td>${item.category}</td>
-      <td><strong>${item.price} DH</strong></td>
-      <td><span style="background: rgba(197, 160, 89, 0.15); color: #8a6519; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;">${item.badge}</span></td>
-      <td>
-        <button class="btn-secondary" style="padding: 6px 12px; font-size: 11px;" onclick="promptEditPrice('${item.id}', ${item.price})">Ajuster Prix</button>
-      </td>
-    </tr>
-  `).join("");
-}
-
-window.promptEditPrice = function(id, oldPrice) {
-  const newPrice = prompt(`Nouveau prix en DH pour ${id} :`, oldPrice);
-  if (newPrice && !isNaN(newPrice)) {
-    showToast(`Prix de ${id} mis à jour : ${newPrice} DH`);
-  }
-};
-
-// RAFRAÎCHISSEMENT DU CADRE D'APERÇU DIRECT
 function refreshPreviewFrame() {
   const iframe = $("#live-preview-iframe");
-  if (iframe) {
-    iframe.src = "./index.html?ts=" + Date.now();
-  }
+  if (iframe) iframe.src = "./index.html?ts=" + Date.now();
 }
 
-// INITIALISATION GLOBALE
-document.addEventListener("DOMContentLoaded", () => {
-  initTabs();
+// ÉCOUTEURS D'INITIALISATION
+document.addEventListener("DOMContentLoaded", async () => {
   initThemeStudio();
   initContentStudio();
   initPagesStudio();
-  initProductsStudio();
 
-  $("#btn-save-all-top").addEventListener("click", () => {
-    saveTheme();
-    saveContent();
-    showToast("Toutes vos modifications No-Code ont été appliquées !");
-  });
+  $$(".nav-item").forEach(b => b.onclick = () => setView(b.dataset.view));
+  $$("[data-go]").forEach(b => b.onclick = () => setView(b.dataset.go));
+
+  $("#login-form").onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = $("#login-form button[type='submit']");
+    const originalText = btn ? btn.textContent : "Se Connecter à l'Espace Admin";
+
+    if (!ready) {
+      showAuthScreen("Configurez SUPABASE_URL et SUPABASE_ANON_KEY dans supabase-config.js.", true);
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Vérification en cours…";
+    }
+    showAuthScreen("<span style='color:var(--admin-gold);'>Connexion à Supabase en cours…</span>", false);
+
+    try {
+      const email = $("#email").value.trim();
+      const password = $("#password").value;
+      const { data, error } = await client.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+      if (error) {
+        showAuthScreen("Identifiants incorrects : " + escapeHtml(error.message), true);
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+        return;
+      }
+
+      const ok = await ensureAdmin(data.session);
+      if (!ok && btn) {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    } catch (err) {
+      console.error(err);
+      showAuthScreen("Erreur de connexion : " + escapeHtml(err.message || "Vérifiez votre connexion."), true);
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
+  };
+
+  $("#logout-button").onclick = async () => {
+    if (client) await client.auth.signOut();
+    showAuthScreen("Vous avez été déconnecté.", false);
+    location.reload();
+  };
+
+  $("#new-product").onclick = () => showProductForm();
+  $("#cancel-product").onclick = hideProductForm;
+  $("#cancel-product-2").onclick = hideProductForm;
+  $("#product-form").onsubmit = saveProduct;
+  $("#product-name").oninput = () => {
+    if (!$("#product-id").value) $("#product-slug").value = safeSlug($("#product-name").value);
+  };
 
   const btnRefresh = $("#btn-refresh-preview");
-  if (btnRefresh) btnRefresh.addEventListener("click", refreshPreviewFrame);
+  if (btnRefresh) btnRefresh.onclick = refreshPreviewFrame;
+
+  // Vérification de la session active
+  if (client) {
+    try {
+      const { data: { session } } = await client.auth.getSession();
+      if (session) {
+        await ensureAdmin(session);
+      } else {
+        showAuthScreen();
+      }
+    } catch (err) {
+      console.error(err);
+      showAuthScreen();
+    }
+
+    client.auth.onAuthStateChange((_evt, sess) => {
+      if (!sess) {
+        showAuthScreen();
+      }
+    });
+  } else {
+    showAuthScreen("Configuration Supabase manquante dans supabase-config.js", true);
+  }
 });
