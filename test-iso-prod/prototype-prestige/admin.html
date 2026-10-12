@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>BOUTIBLANCA — Studio No-Code & Administration</title>
+  <link rel="stylesheet" href="./admin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./supabase-config.js"></script>
+  <script src="./admin.js" defer></script>
+</head>
+<body>
+
+  <div class="admin-shell">
+    <!-- BARRE LATÉRALE DE GESTION -->
+    <aside class="sidebar">
+      <div class="brand-admin">
+        <a class="wordmark" href="./index.html">
+          BOUTI<span>BLANCA</span>
+          <small>STUDIO NO-CODE</small>
+        </a>
+      </div>
+
+      <span class="side-label">Design & Personnalisation</span>
+      <button class="nav-item active" data-tab="theme">
+        <span>🎨</span> <span>Studio Thème & Couleurs</span>
+      </button>
+      <button class="nav-item" data-tab="content">
+        <span>✍</span> <span>Contenus & Photos Hero</span>
+      </button>
+      <button class="nav-item" data-tab="pages">
+        <span>📄</span> <span>Éditeur de Pages No-Code</span>
+      </button>
+
+      <span class="side-label" style="margin-top: 15px;">Boutique & Articles</span>
+      <button class="nav-item" data-tab="products">
+        <span>👗</span> <span>Catalogue (20 Articles)</span>
+      </button>
+      <button class="nav-item" data-tab="orders">
+        <span>📦</span> <span>Commandes Clients</span>
+      </button>
+      <button class="nav-item" data-tab="preview">
+        <span>👁</span> <span>Aperçu Boutique en Direct</span>
+      </button>
+
+      <div class="sidebar-bottom">
+        <a class="btn-view-store" href="./index.html" target="_blank">
+          <span>↗</span> <span>Ouvrir la Boutique</span>
+        </a>
+        <div style="font-size: 11px; color: #8c8275; text-align: center; margin-top: 4px;">
+          Version Prototype Prestige
+        </div>
+      </div>
+    </aside>
+
+    <!-- ZONE DE TRAVAIL PRINCIPALE -->
+    <main class="workspace">
+      <header class="topbar">
+        <div>
+          <span class="badge-nocode">✦ 100% No-Code & Personnalisation Immédiate</span>
+          <h1 id="topbar-title" style="margin-top: 6px;">Studio Thème & Couleurs</h1>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <button class="btn-primary" id="btn-save-all-top">
+            <span>💾</span> <span>Enregistrer & Appliquer</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- ==========================================================================
+           ONGLET 1 : STUDIO THÈME & COULEURS (100% NO-CODE)
+           ========================================================================== -->
+      <section class="view-section active" id="view-theme">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Palettes Impériales en 1 Clic</h2>
+              <p style="color: var(--admin-muted); font-size: 12px;">Choisissez une harmonie de couleurs prête à l'emploi ou personnalisez les tons ci-dessous.</p>
+            </div>
+          </div>
+
+          <div class="presets-grid">
+            <div class="preset-card active" data-preset="gold">
+              <div class="preset-colors">
+                <span class="color-dot" style="background: #c5a059;"></span>
+                <span class="color-dot" style="background: #faf7f2;"></span>
+                <span class="color-dot" style="background: #141210;"></span>
+                <span class="color-dot" style="background: #1b3b2e;"></span>
+              </div>
+              <div class="preset-name">Or Impérial & Écru Soie</div>
+              <div class="preset-desc">La signature historique BOUTIBLANCA. Élégance solaire et raffinée.</div>
+            </div>
+
+            <div class="preset-card" data-preset="ebony">
+              <div class="preset-colors">
+                <span class="color-dot" style="background: #dfba73;"></span>
+                <span class="color-dot" style="background: #12100e;"></span>
+                <span class="color-dot" style="background: #faf7f2;"></span>
+                <span class="color-dot" style="background: #9a742f;"></span>
+              </div>
+              <div class="preset-name">Nuit Ébène & Reflets Dorés</div>
+              <div class="preset-desc">Atmosphère haute joaillerie, dramatique et prestigieuse.</div>
+            </div>
+
+            <div class="preset-card" data-preset="emerald">
+              <div class="preset-colors">
+                <span class="color-dot" style="background: #c5a059;"></span>
+                <span class="color-dot" style="background: #f4f7f5;"></span>
+                <span class="color-dot" style="background: #161412;"></span>
+                <span class="color-dot" style="background: #18382b;"></span>
+              </div>
+              <div class="preset-name">Émeraude Royale & Laiton</div>
+              <div class="preset-desc">Inspirée des jardins andalous et des portes des palais de Fès.</div>
+            </div>
+
+            <div class="preset-card" data-preset="majorelle">
+              <div class="preset-colors">
+                <span class="color-dot" style="background: #e0b464;"></span>
+                <span class="color-dot" style="background: #f6f8fb;"></span>
+                <span class="color-dot" style="background: #101524;"></span>
+                <span class="color-dot" style="background: #172d54;"></span>
+              </div>
+              <div class="preset-name">Bleu Majorelle & Or Éclatant</div>
+              <div class="preset-desc">Le charme vibrant et poétique de Marrakech.</div>
+            </div>
+
+            <div class="preset-card" data-preset="terracotta">
+              <div class="preset-colors">
+                <span class="color-dot" style="background: #c5a059;"></span>
+                <span class="color-dot" style="background: #fbf8f5;"></span>
+                <span class="color-dot" style="background: #1c1512;"></span>
+                <span class="color-dot" style="background: #a44c34;"></span>
+              </div>
+              <div class="preset-name">Terracotta Zellige & Rose Poudré</div>
+              <div class="preset-desc">Douceur minérale contemporaine et tons chauds artisanaux.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Réglages Fins des Couleurs (Temps Réel)</h2>
+          </div>
+
+          <div class="form-grid-3">
+            <div class="form-field">
+              <label>Couleur Or / Principale d'Accent</label>
+              <div class="color-input-wrapper">
+                <input type="color" id="picker-gold" value="#c5a059" />
+                <input type="text" id="hex-gold" value="#c5a059" />
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label>Couleur de Fond de la Boutique</label>
+              <div class="color-input-wrapper">
+                <input type="color" id="picker-bg" value="#faf7f2" />
+                <input type="text" id="hex-bg" value="#faf7f2" />
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label>Couleur des Textes Principaux</label>
+              <div class="color-input-wrapper">
+                <input type="color" id="picker-text" value="#1d1a16" />
+                <input type="text" id="hex-text" value="#1d1a16" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-grid-2" style="margin-top: 20px;">
+            <div class="form-field">
+              <label>Couleur d'Accent Secondaire (Bannières & Badges)</label>
+              <div class="color-input-wrapper">
+                <input type="color" id="picker-accent" value="#1b3b2e" />
+                <input type="text" id="hex-accent" value="#1b3b2e" />
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label>Style Typographique</label>
+              <select id="select-font">
+                <option value='"Playfair Display", "Cinzel", Georgia, serif'>Playfair Display (Classique Haute Couture)</option>
+                <option value='"Cinzel", "Playfair Display", serif'>Cinzel (Majestueux & Impérial)</option>
+                <option value='"Amiri", "Playfair Display", serif'>Amiri (Élégance Orientale)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================================================
+           ONGLET 2 : CONTENUS & PHOTOS STOREFRONT (100% NO-CODE)
+           ========================================================================== -->
+      <section class="view-section" id="view-content">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Visuel Principal du Hero (Changement en 1 Clic)</h2>
+              <p style="color: var(--admin-muted); font-size: 12px;">Sélectionnez une photo haute couture dans la bibliothèque ou collez l'URL de votre propre shooting.</p>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label>URL de l'Image Actuelle</label>
+            <input type="url" id="hero-image-input" value="https://i.pinimg.com/originals/b0/82/9a/b0829aff252d5c80d5798fd5d9fae49a.jpg" />
+          </div>
+
+          <div style="margin-top: 15px;">
+            <label style="font-weight: 700; font-size: 11px; text-transform: uppercase; color: var(--admin-muted);">Bibliothèque de Photos Recommandées :</label>
+            <div class="photo-presets-row">
+              <img class="photo-preset-thumb active" src="https://i.pinimg.com/originals/b0/82/9a/b0829aff252d5c80d5798fd5d9fae49a.jpg" alt="Photo 1" />
+              <img class="photo-preset-thumb" src="https://i.pinimg.com/736x/1d/5a/f1/1d5af1b27361dacfc665bf12d078436f.jpg" alt="Photo 2" />
+              <img class="photo-preset-thumb" src="https://i.pinimg.com/736x/93/f1/3d/93f13df4035c63fec4ba8f0a59644bc9.jpg" alt="Photo 3" />
+              <img class="photo-preset-thumb" src="https://s-media-cache-ak0.pinimg.com/736x/d6/9a/4b/d69a4bd68f9626b43c3dafdcc9f2cccf.jpg" alt="Photo 4" />
+              <img class="photo-preset-thumb" src="https://nalou.fr/wp-content/uploads/2024/07/caftan-marocain-2.jpg" alt="Photo 5" />
+              <img class="photo-preset-thumb" src="https://images.unsplash.com/photo-1566737236500-c8ac43014a67?auto=format&fit=crop&w=800&q=80" alt="Photo 6" />
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Textes & Titres du Storefront</h2>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-field">
+              <label>Bandeau Supérieur (Annonce Défilante)</label>
+              <input type="text" id="announcement-input" value="Livraison Partout au Maroc & International <span>·</span> Haute Tradition & Broderie d'Apparat" />
+            </div>
+
+            <div class="form-field">
+              <label>Numéro WhatsApp Officiel (Commandes Directes)</label>
+              <input type="text" id="whatsapp-input" value="212600000000" placeholder="ex: 212612345678" />
+              <small style="color: var(--admin-muted); font-size: 11px;">Ce numéro reçoit automatiquement tous les clics « Commander sur WhatsApp » du site.</small>
+            </div>
+          </div>
+
+          <div class="form-grid-2" style="margin-top: 18px;">
+            <div class="form-field">
+              <label>Titre Principal du Hero</label>
+              <input type="text" id="hero-title-input" value="L'art du caftan impérial.<br><em>Une allure sans égale.</em>" />
+            </div>
+
+            <div class="form-field">
+              <label>Description du Hero</label>
+              <textarea id="hero-desc-input" rows="3">Chaque création BOUTIBLANCA rend hommage au raffinement séculaire du costume marocain. Des soies tissées à Fès, des velours d'exception et une passementerie délicate façonnée au fil d'or skalli.</textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================================================
+           ONGLET 3 : ÉDITEUR DE PAGES & LANDING PAGES (100% NO-CODE)
+           ========================================================================== -->
+      <section class="view-section" id="view-pages">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Créer une Nouvelle Landing Page sans Coder</h2>
+              <p style="color: var(--admin-muted); font-size: 12px;">Lancez une page thématique (ex: Collection Ramadan, Mariage Fassi, Soldes d'Hiver) en renseignant simplement les blocs visuels.</p>
+            </div>
+          </div>
+
+          <form id="nocode-page-builder-form">
+            <div class="form-grid-2">
+              <div class="form-field">
+                <label>Titre de la Page</label>
+                <input type="text" id="builder-page-title" placeholder="Ex: Collection Spéciale Fêtes & Aïd" required />
+              </div>
+              <div class="form-field">
+                <label>Identifiant URL (Slug)</label>
+                <input type="text" id="builder-page-slug" placeholder="Ex: collection-eid-2026" required />
+              </div>
+            </div>
+
+            <div class="form-grid-2" style="margin-top: 16px;">
+              <div class="form-field">
+                <label>Photo de Couverture de la Page</label>
+                <input type="url" id="builder-page-cover" value="https://i.pinimg.com/736x/93/f1/3d/93f13df4035c63fec4ba8f0a59644bc9.jpg" />
+              </div>
+              <div class="form-field">
+                <label>Catégorie de Produits à Mettre en Avant</label>
+                <select id="builder-page-category">
+                  <option value="Tous">Toutes les Catégories</option>
+                  <option value="Caftan">Caftans Uniquement</option>
+                  <option value="Takchita">Takchitas Uniquement</option>
+                  <option value="Jellaba">Jellabas Uniquement</option>
+                  <option value="Foulard">Foulards & Hijabs</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-field" style="margin-top: 16px;">
+              <label>Message de Présentation</label>
+              <textarea id="builder-page-message" rows="3" placeholder="Présentez cette sélection exclusive à vos clientes…"></textarea>
+            </div>
+
+            <div style="margin-top: 24px; display: flex; gap: 12px;">
+              <button class="btn-primary" type="submit">
+                <span>✦</span> <span>Publier cette Landing Page</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Pages Déjà Publiées</h2>
+          </div>
+          <div id="admin-pages-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <!-- Rempli par admin.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================================================
+           ONGLET 4 : CATALOGUE DES 20 ARTICLES
+           ========================================================================== -->
+      <section class="view-section" id="view-products">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Les 20 Créations en Ligne</h2>
+              <p style="color: var(--admin-muted); font-size: 12px;">Consultez et ajustez les prix, stocks et photos de chaque article en 1 clic.</p>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Pièce & Photo</th>
+                  <th>Catégorie</th>
+                  <th>Prix en DH</th>
+                  <th>Badge Prestige</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-products-table-body">
+                <!-- Rempli par admin.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================================================
+           ONGLET 5 : COMMANDES CLIENTS
+           ========================================================================== -->
+      <section class="view-section" id="view-orders">
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Commandes Enregistrées (WhatsApp & Base)</h2>
+          </div>
+          <div id="admin-orders-content">
+            <p style="color: var(--admin-muted);">Les commandes passées via le panier ou WhatsApp sont prêtes à être expédiées.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================================================
+           ONGLET 6 : APERÇU BOUTIQUE EN DIRECT
+           ========================================================================== -->
+      <section class="view-section" id="view-preview">
+        <div class="live-preview-wrap">
+          <div class="preview-bar">
+            <span>Aperçu de la Vitrine BOUTIBLANCA en Temps Réel</span>
+            <button class="btn-secondary" style="padding: 6px 14px; font-size: 11px;" id="btn-refresh-preview">Rafraîchir ⟳</button>
+          </div>
+          <iframe class="preview-iframe" id="live-preview-iframe" src="./index.html"></iframe>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="admin-toast" id="admin-toast">Modifications enregistrées avec succès !</div>
+
+</body>
+</html>
