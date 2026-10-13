@@ -442,6 +442,15 @@ const translations = {
     emptyCart: "Votre panier attend sa première pièce d'exception.",
     continueShopping: "Continuer mes découvertes",
     confirmWa: "Confirmer par WhatsApp",
+    checkoutFormBtn: "Commander & Enregistrer",
+    labelName: "Nom complet",
+    labelPhone: "Téléphone WhatsApp",
+    labelCity: "Ville",
+    labelAddress: "Adresse de livraison",
+    submitOrder: "Valider la commande",
+    orderSaving: "Enregistrement en cours…",
+    orderSuccess: "✦ Commande enregistrée ! Nous vous contactons sous 24h.",
+    orderError: "Erreur : ",
     currency: "DH"
   },
   ar: {
@@ -522,6 +531,15 @@ const translations = {
     emptyCart: "سلتك تنتظر أول قطعة تليق بذوقك.",
     continueShopping: "تابعي الاكتشاف",
     confirmWa: "تأكيد الطلب عبر واتساب",
+    checkoutFormBtn: "أطلبي وسجّلي طلبك",
+    labelName: "الاسم الكامل",
+    labelPhone: "رقم الهاتف / واتساب",
+    labelCity: "المدينة",
+    labelAddress: "عنوان التوصيل",
+    submitOrder: "تأكيد الطلبية",
+    orderSaving: "جارٍ تسجيل طلبك…",
+    orderSuccess: "✦ تم تسجيل طلبك بنجاح! سنتصل بك خلال 24 ساعة.",
+    orderError: "خطأ: ",
     currency: "درهم"
   }
 };
@@ -1050,7 +1068,112 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const yearEl = $("#current-year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  // ---- FORMULAIRE COMMANDE : toggle accordéon ----
+  const btnShowForm = $("#btn-show-order-form");
+  const formBody    = $("#checkout-form-body");
+  if (btnShowForm && formBody) {
+    btnShowForm.onclick = () => {
+      formBody.classList.toggle("open");
+    };
+  }
+
+  // ---- FORMULAIRE COMMANDE : soumission Supabase ----
+  const btnSubmit = $("#btn-submit-order");
+  if (btnSubmit) {
+    btnSubmit.onclick = submitOrder;
+  }
 });
+
+// Soumission de la commande vers Supabase + message WhatsApp de confirmation
+async function submitOrder() {
+  const t = translations[state.language];
+  const feedbackEl = $("#checkout-feedback");
+  const btnEl      = $("#btn-submit-order");
+
+  const name    = ($("#checkout-name")?.value  || "").trim();
+  const phone   = ($("#checkout-phone")?.value || "").trim();
+  const city    = ($("#checkout-city")?.value  || "").trim();
+  const address = ($("#checkout-address")?.value || "").trim();
+
+  // Validation basique
+  if (name.length < 2)    { setFeedback(feedbackEl, (t.orderError || "Erreur: ") + (state.language === "ar" ? "أدخلي اسمك الكامل." : "Merci de saisir votre nom complet."), "error"); return; }
+  if (phone.length < 7)   { setFeedback(feedbackEl, (t.orderError || "Erreur: ") + (state.language === "ar" ? "أدخلي رقم هاتف صحيح." : "Merci de saisir un numéro de téléphone valide."), "error"); return; }
+  if (city.length < 2)    { setFeedback(feedbackEl, (t.orderError || "Erreur: ") + (state.language === "ar" ? "أدخلي المدينة." : "Merci de saisir votre ville."), "error"); return; }
+  if (address.length < 4) { setFeedback(feedbackEl, (t.orderError || "Erreur: ") + (state.language === "ar" ? "أدخلي عنوان التوصيل." : "Merci de saisir votre adresse."), "error"); return; }
+  if (state.cart.length === 0) { setFeedback(feedbackEl, (state.language === "ar" ? "السلة فارغة." : "Votre panier est vide."), "error"); return; }
+
+  // Construire les items pour le RPC Supabase
+  const items = state.cart.map(item => ({ id: item.id, quantity: item.quantity }));
+
+  if (btnEl) { btnEl.disabled = true; btnEl.textContent = t.orderSaving || "En cours…"; }
+  setFeedback(feedbackEl, t.orderSaving || "En cours…", "");
+
+  try {
+    const cfg = window.BOUTIBLANCA_CONFIG || {};
+    let orderNumber = null;
+
+    if (window.supabase && cfg.SUPABASE_URL && !cfg.SUPABASE_URL.includes("TON-PROJET")) {
+      const db = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+      const { data, error } = await db.rpc("create_store_order", {
+        p_customer_name:     name,
+        p_customer_phone:    phone,
+        p_shipping_address:  address,
+        p_city:              city,
+        p_items:             items
+      });
+      if (error) throw new Error(error.message);
+      orderNumber = data?.order_number;
+    }
+
+    // Succès : on vide le panier et on envoie un message WhatsApp de confirmation
+    const successMsg = t.orderSuccess || "✦ Commande enregistrée !";
+    setFeedback(feedbackEl, orderNumber ? `${successMsg} (#${orderNumber})` : successMsg, "success");
+
+    // Construire le message WhatsApp de confirmation
+    const isAr = state.language === "ar";
+    const lines = state.cart.map(item => {
+      const p = PRODUCTS.find(x => x.id === item.id);
+      const pName = isAr && p?.name_ar ? p.name_ar : (p ? p.name : "Pièce");
+      return `• ${pName} x${item.quantity} (${formatPrice((p?.price||0)*item.quantity)})`;
+    }).join("\n");
+    const total = state.cart.reduce((acc, item) => {
+      const p = PRODUCTS.find(x => x.id === item.id);
+      return acc + (p ? p.price * item.quantity : 0);
+    }, 0);
+    const waMsg = isAr
+      ? `السلام عليكم بوتي بلانكا،\n\nأود تأكيد طلبيتي الجديدة:\n\n${lines}\n\n*المجموع:* ${formatPrice(total)}\n\n*الاسم:* ${name}\n*الهاتف:* ${phone}\n*المدينة:* ${city}\n*العنوان:* ${address}${orderNumber ? `\n\n*رقم الطلب:* #${orderNumber}` : ""}`
+      : `Bonjour BOUTIBLANCA,\n\nJe viens de valider ma commande :\n\n${lines}\n\n*Total :* ${formatPrice(total)}\n\n*Nom :* ${name}\n*Tél :* ${phone}\n*Ville :* ${city}\n*Adresse :* ${address}${orderNumber ? `\n\n*N° commande :* #${orderNumber}` : ""}`;
+
+    // Vider le panier
+    state.cart = [];
+    saveCart();
+    renderCart();
+
+    // Ouvrir WhatsApp après 1.2s pour laisser le temps de voir le message de succès
+    setTimeout(() => {
+      const waPhone = getStoreWhatsAppNumber();
+      window.open(`https://api.whatsapp.com/send?phone=${waPhone}&text=${encodeURIComponent(waMsg)}`, "_blank");
+    }, 1200);
+
+  } catch (err) {
+    console.error("Erreur commande:", err);
+    const errMsg = (t.orderError || "Erreur: ") + (err.message || (state.language === "ar" ? "يرجى المحاولة مرة أخرى." : "Veuillez réessayer."));
+    setFeedback(feedbackEl, errMsg, "error");
+  } finally {
+    if (btnEl) {
+      btnEl.disabled = false;
+      const submitLabel = t.submitOrder || "Valider la commande";
+      btnEl.innerHTML = `<span>✦</span> <span>${submitLabel}</span>`;
+    }
+  }
+}
+
+function setFeedback(el, msg, type) {
+  if (!el) return;
+  el.textContent = msg;
+  el.className = "checkout-feedback" + (type ? ` ${type}` : "");
+}
 
 window.addEventListener("storage", (e) => {
   if (e.key === "boutiblanca_theme_settings" || e.key === "boutiblanca_content_settings") {

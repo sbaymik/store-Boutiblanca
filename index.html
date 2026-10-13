@@ -442,9 +442,41 @@
         <span data-i18n="subtotal">Sous-total</span>
         <span id="cart-total-price">0 DH</span>
       </div>
+
+      <!-- OPTION 1 : Commander directement via WhatsApp -->
       <a class="btn-checkout-wa" id="btn-cart-checkout-wa" href="#" target="_blank" rel="noopener noreferrer">
         <span>💬</span> <span data-i18n="confirmWa">Confirmer par WhatsApp</span>
       </a>
+
+      <!-- OPTION 2 : Enregistrer la commande sur Supabase + notification WhatsApp -->
+      <div class="checkout-form-section">
+        <button class="checkout-form-toggle" id="btn-show-order-form" type="button">
+          <span>🛍</span> <span data-i18n="checkoutFormBtn">Commander &amp; Enregistrer</span>
+        </button>
+        <div class="checkout-form-body" id="checkout-form-body">
+          <div>
+            <label for="checkout-name" data-i18n="labelName">Nom complet</label>
+            <input id="checkout-name" type="text" autocomplete="name" placeholder="Votre nom et prénom" required />
+          </div>
+          <div>
+            <label for="checkout-phone" data-i18n="labelPhone">Téléphone WhatsApp</label>
+            <input id="checkout-phone" type="tel" autocomplete="tel" placeholder="+212 6 XX XX XX XX" required />
+          </div>
+          <div>
+            <label for="checkout-city" data-i18n="labelCity">Ville</label>
+            <input id="checkout-city" type="text" autocomplete="address-level2" placeholder="Casablanca, Rabat, Fès…" required />
+          </div>
+          <div>
+            <label for="checkout-address" data-i18n="labelAddress">Adresse de livraison</label>
+            <input id="checkout-address" type="text" autocomplete="street-address" placeholder="N°, Rue, Quartier…" required />
+          </div>
+          <button class="btn-submit-order" id="btn-submit-order" type="button">
+            <span>✦</span> <span data-i18n="submitOrder">Valider la commande</span>
+          </button>
+          <p class="checkout-feedback" id="checkout-feedback"></p>
+        </div>
+      </div>
+
       <button class="btn-checkout-supabase" id="btn-cart-continue" onclick="document.getElementById('cart-close-btn').click();">
         <span data-i18n="continueShopping">Continuer mes découvertes</span>
       </button>

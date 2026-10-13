@@ -1536,6 +1536,127 @@ img {
 }
 
 /* ==========================================================================
+   FORMULAIRE DE COMMANDE SUPABASE (CART DRAWER)
+   ========================================================================== */
+.checkout-form-section {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.checkout-form-toggle {
+  width: 100%;
+  background: var(--bg-dark);
+  color: var(--gold-light);
+  padding: 13px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 0;
+  cursor: pointer;
+  border: none;
+  transition: background var(--transition-fast);
+}
+
+.checkout-form-toggle:hover {
+  background: #2c2824;
+}
+
+.checkout-form-body {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 0 0;
+}
+
+.checkout-form-body.open {
+  display: flex;
+}
+
+.checkout-form-body label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+  display: block;
+}
+
+.checkout-form-body input,
+.checkout-form-body select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-main);
+  background: var(--bg-canvas);
+  font-family: var(--font-sans);
+  transition: border-color var(--transition-fast);
+}
+
+.checkout-form-body input:focus,
+.checkout-form-body select:focus {
+  border-color: var(--gold-primary);
+  outline: none;
+}
+
+.checkout-form-body input::placeholder {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.btn-submit-order {
+  width: 100%;
+  background: var(--gold-gradient);
+  color: #fff;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+  border: none;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.btn-submit-order:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.checkout-feedback {
+  font-size: 12px;
+  text-align: center;
+  margin-top: 6px;
+  min-height: 18px;
+  color: var(--text-muted);
+}
+
+.checkout-feedback.success {
+  color: #2d7a4a;
+  font-weight: 600;
+}
+
+.checkout-feedback.error {
+  color: #9a3a2b;
+  font-weight: 600;
+}
+
+/* ==========================================================================
    PIED DE PAGE (FOOTER MAJESTUEUX)
    ========================================================================== */
 .site-footer {
@@ -1759,9 +1880,10 @@ html[dir="rtl"] .footer-brand .wordmark {
 }
 
 @media (max-width: 768px) {
+  /* ---- HEADER ---- */
   .site-header {
-    height: 72px;
-    padding: 0 18px;
+    height: 64px;
+    padding: 0 16px;
   }
   .main-nav, .btn-header-wa {
     display: none;
@@ -1769,47 +1891,177 @@ html[dir="rtl"] .footer-brand .wordmark {
   .mobile-menu-btn {
     display: block;
   }
+  .wordmark {
+    font-size: 18px;
+    letter-spacing: 0.16em;
+  }
+  .header-actions {
+    gap: 10px;
+  }
+
+  /* ---- CARROUSEL : UNE CARTE PRESQUE PLEINE LARGEUR ---- */
   .top-carousel-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 14px;
+  }
+  .carousel-viewport {
+    padding: 10px 16px 24px;
   }
   .carousel-card {
-    width: 250px;
+    /* Carte large = 80vw max pour voir qu'il y en a d'autres */
+    width: min(82vw, 320px);
   }
   .card-image-box {
-    height: 320px;
+    height: 300px;
   }
+  .card-img {
+    object-position: center 20%;
+  }
+
+  /* ---- GRILLE COLLECTION : 2 COLONNES SUR MOBILE ---- */
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    gap: 14px 12px;
   }
+
+  /* ---- CATÉGORIES : 1 COLONNE ---- */
   .categories-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
   .cat-tile {
-    height: 240px;
+    height: 200px;
   }
+
+  /* ---- HERO ---- */
+  .hero-prestige {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding: 30px 5%;
+  }
+  .hero-visual {
+    display: none;
+  }
+  .hero-title {
+    font-size: clamp(28px, 7vw, 40px);
+  }
+  .hero-paragraph {
+    font-size: 13px;
+  }
+  .hero-cta-group {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .hero-stats {
+    gap: 20px;
+  }
+  .stat-item strong {
+    font-size: 18px;
+  }
+
+  /* ---- VIP WHATSAPP ---- */
   .vip-wa-banner {
     flex-direction: column;
-    padding: 35px 25px;
+    padding: 28px 20px;
     text-align: center;
+    gap: 20px;
   }
   .btn-vip-wa {
     width: 100%;
     justify-content: center;
   }
+
+  /* ---- QUICK VIEW MODAL : IMAGE VISIBLE ---- */
   .quickview-modal {
     grid-template-columns: 1fr;
-    max-height: 85vh;
+    max-height: 90vh;
+    overflow-y: auto;
+    max-width: 95vw;
+    border-radius: 16px;
   }
   .modal-image-col {
-    height: 260px;
-    min-height: auto;
+    height: 280px;
+    min-height: 220px;
+    flex-shrink: 0;
   }
+  .modal-image-col img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 15%;
+    display: block;
+  }
+  .modal-info-col {
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  /* ---- PANIER : pleine hauteur ---- */
+  .cart-drawer {
+    padding: 20px 18px;
+    width: 100%;
+  }
+
+  /* ---- FORMULAIRE COMMANDE SUPABASE ---- */
+  .checkout-form-section {
+    padding: 16px 0 0;
+  }
+  .checkout-form-section input,
+  .checkout-form-section select {
+    font-size: 14px;
+    padding: 12px 14px;
+  }
+
+  /* ---- FOOTER ---- */
   .footer-top {
     grid-template-columns: 1fr;
+    gap: 30px;
   }
+  .footer-bottom {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+
+  /* ---- FLOATING WA : pilule cachée, cercle seul ---- */
   .floating-wa-pill {
     display: none;
   }
+
+  /* ---- HÉRITAGE / STORYTELLING ---- */
+  .heritage-section {
+    padding: 50px 5%;
+  }
+  .heritage-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  .heritage-images {
+    display: none;
+  }
+
+  /* ---- CONFIANCE ---- */
+  .trust-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
 }
+
+/* Mobile très petit (375px) */
+@media (max-width: 420px) {
+  .carousel-card {
+    width: min(88vw, 300px);
+  }
+  .products-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .card-image-box {
+    height: 260px;
+  }
+  .carousel-viewport {
+    padding: 8px 12px 20px;
+  }
+}
+
