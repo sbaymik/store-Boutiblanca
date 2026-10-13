@@ -1096,76 +1096,98 @@ async function submitOrder() {
   const city    = ($("#checkout-city")?.value  || "").trim();
   const address = ($("#checkout-address")?.value || "").trim();
 
-  // Validation basique
-  if (name.length < 2)    { setFeedback(feedbackEl, (t.orderError || "Erreur: ") + (state.language === "ar" ? "أدخلي اسمك الكامل." : "Merci de saisir votre nom complet."), "error"); return; }
-  if (phone.length < 7)   { setFeedback(feedbackEl, (t.orderError || "Erreur: ") + (state.language === "ar" ? "أدخلي رقم هاتف صحيح." : "Merci de saisir un numéro de téléphone valide."), "error"); return; }
-  if (city.length < 2)    { setFeedback(feedbackEl, (t.orderError || "Erreur: ") + (state.language === "ar" ? "أدخلي المدينة." : "Merci de saisir votre ville."), "error"); return; }
-  if (address.length < 4) { setFeedback(feedbackEl, (t.orderError || "Erreur: ") + (state.language === "ar" ? "أدخلي عنوان التوصيل." : "Merci de saisir votre adresse."), "error"); return; }
-  if (state.cart.length === 0) { setFeedback(feedbackEl, (state.language === "ar" ? "السلة فارغة." : "Votre panier est vide."), "error"); return; }
+  // Validation basique — feedback via le paragraphe inline
+  if (name.length < 2)    { setFeedback(feedbackEl, state.language === "ar" ? "⚠ أدخلي اسمك الكامل." : "⚠ Merci de saisir votre nom complet.", "error"); return; }
+  if (phone.length < 7)   { setFeedback(feedbackEl, state.language === "ar" ? "⚠ أدخلي رقم هاتف صحيح." : "⚠ Numéro de téléphone invalide.", "error"); return; }
+  if (city.length < 2)    { setFeedback(feedbackEl, state.language === "ar" ? "⚠ أدخلي المدينة." : "⚠ Merci de saisir votre ville.", "error"); return; }
+  if (address.length < 4) { setFeedback(feedbackEl, state.language === "ar" ? "⚠ أدخلي عنوان التوصيل." : "⚠ Adresse de livraison requise.", "error"); return; }
+  if (state.cart.length === 0) { setFeedback(feedbackEl, state.language === "ar" ? "السلة فارغة." : "Votre panier est vide.", "error"); return; }
 
-  // Construire les items pour le RPC Supabase
-  const items = state.cart.map(item => ({ id: item.id, quantity: item.quantity }));
+
+  // ── Construire le récapitulatif WA (côté client, toujours disponible) ──
+  const isAr = state.language === "ar";
+  const lines = state.cart.map(item => {
+    const p = PRODUCTS.find(x => x.id === item.id);
+    const pName = isAr && p?.name_ar ? p.name_ar : (p ? p.name : "Pièce");
+    return `• ${pName} x${item.quantity} (${formatPrice((p?.price||0)*item.quantity)})`;
+  }).join("\n");
+  const total = state.cart.reduce((acc, item) => {
+    const p = PRODUCTS.find(x => x.id === item.id);
+    return acc + (p ? p.price * item.quantity : 0);
+  }, 0);
 
   if (btnEl) { btnEl.disabled = true; btnEl.textContent = t.orderSaving || "En cours…"; }
-  setFeedback(feedbackEl, t.orderSaving || "En cours…", "");
+  setFeedback(feedbackEl, "", "");
 
+  // ── Tentative Supabase (non-bloquante) ────────────────────────────────────
+  let orderNumber = null;
+  let supabaseOk  = false;
   try {
     const cfg = window.BOUTIBLANCA_CONFIG || {};
-    let orderNumber = null;
-
     if (window.supabase && cfg.SUPABASE_URL && !cfg.SUPABASE_URL.includes("TON-PROJET")) {
       const db = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
-      const { data, error } = await db.rpc("create_store_order", {
-        p_customer_name:     name,
-        p_customer_phone:    phone,
-        p_shipping_address:  address,
-        p_city:              city,
-        p_items:             items
-      });
-      if (error) throw new Error(error.message);
-      orderNumber = data?.order_number;
+      // Le RPC crée_store_order exige des UUID valides pour matcher la table products.
+      // Nos CORE_PRODUCTS ont des IDs texte (ex: "caftan-1") → on utilise create_store_order_lite
+      // qui accepte un snapshot JSON sans vérifier les UUIDs.
+      const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const allUUID = state.cart.every(item => UUID_RE.test(item.id));
+
+      if (allUUID) {
+        // Produits Supabase avec vrais UUIDs → RPC complet avec validation stock
+        const items = state.cart.map(item => ({ id: item.id, quantity: item.quantity }));
+        const { data, error } = await db.rpc("create_store_order", {
+          p_customer_name: name, p_customer_phone: phone,
+          p_shipping_address: address, p_city: city, p_items: items
+        });
+        if (!error) { orderNumber = data?.order_number; supabaseOk = true; }
+        else console.warn("RPC create_store_order:", error.message);
+      } else {
+        // CORE_PRODUCTS (slugs) → RPC simplifié sans validation UUID
+        const snapshot = state.cart.map(item => {
+          const p = PRODUCTS.find(x => x.id === item.id);
+          return { slug: item.id, name: p ? p.name : item.id, category: p?.category || "",
+                   unit_price_mad: p?.price || 0, quantity: item.quantity };
+        });
+        const { data, error } = await db.rpc("create_store_order_lite", {
+          p_customer_name: name, p_customer_phone: phone,
+          p_shipping_address: address, p_city: city,
+          p_snapshot: JSON.stringify(snapshot), p_total_mad: total
+        });
+        if (!error) { orderNumber = data?.order_number; supabaseOk = true; }
+        // Si le RPC lite n'existe pas encore → warning silencieux, WA s'ouvre quand même
+        else console.warn("RPC create_store_order_lite:", error.message);
+      }
     }
-
-    // Succès : on vide le panier et on envoie un message WhatsApp de confirmation
-    const successMsg = t.orderSuccess || "✦ Commande enregistrée !";
-    setFeedback(feedbackEl, orderNumber ? `${successMsg} (#${orderNumber})` : successMsg, "success");
-
-    // Construire le message WhatsApp de confirmation
-    const isAr = state.language === "ar";
-    const lines = state.cart.map(item => {
-      const p = PRODUCTS.find(x => x.id === item.id);
-      const pName = isAr && p?.name_ar ? p.name_ar : (p ? p.name : "Pièce");
-      return `• ${pName} x${item.quantity} (${formatPrice((p?.price||0)*item.quantity)})`;
-    }).join("\n");
-    const total = state.cart.reduce((acc, item) => {
-      const p = PRODUCTS.find(x => x.id === item.id);
-      return acc + (p ? p.price * item.quantity : 0);
-    }, 0);
-    const waMsg = isAr
-      ? `السلام عليكم بوتي بلانكا،\n\nأود تأكيد طلبيتي الجديدة:\n\n${lines}\n\n*المجموع:* ${formatPrice(total)}\n\n*الاسم:* ${name}\n*الهاتف:* ${phone}\n*المدينة:* ${city}\n*العنوان:* ${address}${orderNumber ? `\n\n*رقم الطلب:* #${orderNumber}` : ""}`
-      : `Bonjour BOUTIBLANCA,\n\nJe viens de valider ma commande :\n\n${lines}\n\n*Total :* ${formatPrice(total)}\n\n*Nom :* ${name}\n*Tél :* ${phone}\n*Ville :* ${city}\n*Adresse :* ${address}${orderNumber ? `\n\n*N° commande :* #${orderNumber}` : ""}`;
-
-    // Vider le panier
-    state.cart = [];
-    saveCart();
-    renderCart();
-
-    // Ouvrir WhatsApp après 1.2s pour laisser le temps de voir le message de succès
-    setTimeout(() => {
-      const waPhone = getStoreWhatsAppNumber();
-      window.open(`https://api.whatsapp.com/send?phone=${waPhone}&text=${encodeURIComponent(waMsg)}`, "_blank");
-    }, 1200);
-
   } catch (err) {
-    console.error("Erreur commande:", err);
-    const errMsg = (t.orderError || "Erreur: ") + (err.message || (state.language === "ar" ? "يرجى المحاولة مرة أخرى." : "Veuillez réessayer."));
-    setFeedback(feedbackEl, errMsg, "error");
-  } finally {
-    if (btnEl) {
-      btnEl.disabled = false;
-      const submitLabel = t.submitOrder || "Valider la commande";
-      btnEl.innerHTML = `<span>✦</span> <span>${submitLabel}</span>`;
-    }
+    console.warn("Supabase non-blocking error:", err.message);
+  }
+
+  // ── Construire le message WhatsApp complet ────────────────────────────────
+  const waMsg = isAr
+    ? `السلام عليكم بوتي بلانكا،\n\nأود تأكيد طلبيتي الجديدة:\n\n${lines}\n\n*المجموع:* ${formatPrice(total)}\n\n*الاسم:* ${name}\n*الهاتف:* ${phone}\n*المدينة:* ${city}\n*العنوان:* ${address}${orderNumber ? `\n\n*رقم الطلب:* #${orderNumber}` : ""}`
+    : `Bonjour BOUTIBLANCA,\n\nJe viens de valider ma commande :\n\n${lines}\n\n*Total :* ${formatPrice(total)}\n\n*Nom :* ${name}\n*Tél :* ${phone}\n*Ville :* ${city}\n*Adresse :* ${address}${orderNumber ? `\n\n*N° commande :* #${orderNumber}` : ""}`;
+
+  // ── Vider panier + toast visible + ouvrir WhatsApp ────────────────────────
+  const cartSnapshot = [...state.cart]; // garder une copie au cas où
+  state.cart = [];
+  saveCart();
+  renderCart();
+
+  const toastMsg = supabaseOk && orderNumber
+    ? (isAr ? `✦ طلبك #${orderNumber} مسجّل ! فتح واتساب…` : `✦ Commande #${orderNumber} enregistrée ! Ouverture WhatsApp…`)
+    : (isAr ? "✦ طلبك جاهز ! فتح واتساب للتأكيد…" : "✦ Commande prête ! Ouverture WhatsApp…");
+  showToast(toastMsg);
+
+  setTimeout(() => closeCart(), 400);
+  setTimeout(() => {
+    const waPhone = getStoreWhatsAppNumber();
+    window.open(`https://api.whatsapp.com/send?phone=${waPhone}&text=${encodeURIComponent(waMsg)}`, "_blank");
+  }, 900);
+
+  if (btnEl) {
+    btnEl.disabled = false;
+    const lbl = t.submitOrder || "Valider la commande";
+    btnEl.innerHTML = `<span>✦</span> <span>${lbl}</span>`;
   }
 }
 
@@ -1174,6 +1196,7 @@ function setFeedback(el, msg, type) {
   el.textContent = msg;
   el.className = "checkout-feedback" + (type ? ` ${type}` : "");
 }
+
 
 window.addEventListener("storage", (e) => {
   if (e.key === "boutiblanca_theme_settings" || e.key === "boutiblanca_content_settings") {
