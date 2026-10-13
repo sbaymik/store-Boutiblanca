@@ -1007,16 +1007,25 @@ async function syncSupabaseCatalogue() {
         details_ar: p.description_ar || ""
       }));
 
-      // Les 20 pièces authentiques restent toujours présentes
-      PRODUCTS = [...CORE_PRODUCTS];
+      // Fusionner : les produits Supabase prennent la priorité sur les CORE_PRODUCTS
+      // (slug = clé de déduplication — c'est le même que l'id CORE)
+      const merged = [...CORE_PRODUCTS];
       supabaseItems.forEach(sp => {
-        const existingIdx = PRODUCTS.findIndex(cp => cp.id === sp.id || cp.name === sp.name);
+        // Chercher par slug (= id dans CORE_PRODUCTS) OU par uuid Supabase
+        const existingIdx = merged.findIndex(cp => cp.id === sp.id || cp.slug === sp.id);
         if (existingIdx >= 0) {
-          PRODUCTS[existingIdx] = { ...PRODUCTS[existingIdx], ...sp };
+          // Produit Supabase écrase le CORE_PRODUCT du même slug
+          merged[existingIdx] = {
+            ...merged[existingIdx], // conserver details/details_ar du CORE si absents
+            ...sp,
+            id: merged[existingIdx].id // conserver l'id slug pour le panier
+          };
         } else {
-          PRODUCTS.push(sp);
+          // Nouveau produit Supabase (non présent dans CORE) → ajouter à la fin
+          merged.push(sp);
         }
       });
+      PRODUCTS = merged;
 
       initTopCarousel();
       renderGridProducts();
@@ -1026,6 +1035,7 @@ async function syncSupabaseCatalogue() {
     console.warn("Supabase local mode.", err);
   }
 }
+
 
 document.addEventListener("DOMContentLoaded", () => {
   applyNoCodeSettings();
